@@ -1,0 +1,315 @@
+<!--
+This app is completely self-contained. You don't even need a web server, you can just open the html
+file in a browser from your local machine and run it directly.
+
+@author Kip Robinson, https://github.com/kiprobinson
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Mini Calendar</title>
+<link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAB3SURBVDhP7ZNdCsAgDIONV/H+R+pZuqZWkEHdH9vTPiiLYmMKDqpaAGi5gfWispkmrNj0EpFDzd7qXQ+AlZn1283RbzhLa82/NHBmbUahcs3z34wwomZ4HDLrfdTBOyN0uWY1WgTKo2aa5/+HZKlpxL8q1pdQVWzzNiKIWX7GMwAAAABJRU5ErkJggg=="/>
+<style type="text/css">
+/* Copied from: http://yui.yahooapis.com/3.18.1/build/cssreset/cssreset-min.css */
+html{color:#000;background:#FFF}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0}table{border-collapse:collapse;border-spacing:0}fieldset,img{border:0}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal}ol,ul{list-style:none}caption,th{text-align:left}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}q:before,q:after{content:''}abbr,acronym{border:0;font-variant:normal}sup{vertical-align:text-top}sub{vertical-align:text-bottom}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;*font-size:100%}legend{color:#000}#yui3-css-stamp.cssreset{display:none}
+/* --- end Yahoo reset script --- */
+
+html {
+  background-color: white;
+}
+body {
+  font-family: Tahoma,Arial,sans-serif;
+  font-size: 0.8em;
+  padding: 1px;
+  padding-right: 5px;
+}
+textarea {
+  min-width: 200px;
+  min-height: 400px;
+}
+h2 {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+#calendar {
+  display: inline-block;
+  width: 3cm;
+  font-size: 0.25cm;
+}
+#calendar table {
+  width: 100%;
+}
+#calendar table td {
+  border: 1px solid #888;
+  text-align: right;
+  width: 0.5cm;
+  height: 0.375cm;
+  padding: 0 0.03cm;
+}
+#calendar table th {
+  border: 2px solid black;
+  text-align: center;
+}
+#calendar table .month {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+}
+#controls {
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 1.0em;
+  border: 1px solid black;
+  padding: 0.5em;
+}
+#calendar table td.month-border-top    { border-top:    2px solid black; }
+#calendar table td.month-border-bottom { border-bottom: 2px solid black; }
+#calendar table td.month-border-left   { border-left:   2px solid black; }
+#calendar table td.month-border-right  { border-right:  2px solid black; }
+
+.datelist {
+  display:inline-block;
+  padding-top: 0.5rem;
+}
+.datelist + .datelist {
+  padding-left: 0.5rem;
+}
+.different-year {
+  color: #888;
+}
+.holiday {
+  background-color: #F79646;
+}
+.pto-day {
+  background-color: #ffff00;
+}
+
+@media print {
+  #controls {
+    display: none;
+  }
+}
+
+</style>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script type="text/javascript">
+//<![CDATA[ 
+$(function() {
+  const JAN = 0;
+  const DEC = 11;
+  const SUN=0, MON=1, TUE=2, WED=3, THU=4, FRI=5, SAT=6;
+  const MONTHS = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
+  const options = loadOptions();
+  $('#year').val(options.year);
+  $('#includePrevDec')[0].checked = options.includePrevDec;
+  $('#includeNextJan')[0].checked = options.includeNextJan;
+  $('#holidays').val(options.holidays);
+  $('#ptoDays').val(options.ptoDays);
+  
+  $('#year, #includePrevDec, #includeNextJan, #holidays, #ptoDays').on('change click keyup', updateOptions);
+  
+  $('#print').on('click', function() {
+    alert('Be sure to enable "Background graphics" options to get highlighted days');
+    window.print();
+  });
+  
+  function loadOptions() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('mini-calendar')) }
+    catch (e) { console.error(e); }
+    
+    if(!saved)
+      saved = {};
+    
+    return {
+      year: (1000 <= saved.year && saved.year <= 9999 ? Number(saved.year) : new Date().getFullYear()),
+      includePrevDec: ('boolean' === typeof saved.includePrevDec ? saved.includePrevDec : true),
+      includeNextJan: ('boolean' === typeof saved.includeNextJan ? saved.includeNextJan : true),
+      holidays: saved.holidays || '',
+      ptoDays: saved.ptoDays || '',
+    };
+  }
+  
+  function updateOptions() {
+    let year = Number($('#year').val());
+    if(!year || !(1000 <= year && year <= 9999)) {
+      year = new Date().getFullYear();
+      $('#year').addClass('invalid');
+    }
+    else {
+      $('#year').removeClass('invalid');
+    }
+    
+    options.year = Math.floor(year);
+    options.includePrevDec = !!($('#includePrevDec')[0].checked);
+    options.includeNextJan = !!($('#includeNextJan')[0].checked);
+    options.holidays = $('#holidays').val();
+    options.ptoDays = $('#ptoDays').val();
+    
+    try { localStorage.setItem('mini-calendar', JSON.stringify(options)); }
+    catch (e) { console.error(e) };
+    
+    generateCalendar();
+  }
+  
+  function firstMondayInMonth(year, month) {
+    let d = new Date(year, month, 1, 12);
+    if(d.getDay() !== MON)
+      d.setDate(d.getDate() + (MON - d.getDay() + 7)%7);
+    return d;
+  }
+  
+  function lastFridayInMonth(year, month) {
+    let d = lastDayOfMonth(year, month);
+    if(d.getDay() !== FRI)
+      d.setDate(d.getDate() - (d.getDay() - FRI + 7)%7);
+    return d;
+  }
+  
+  function lastDayOfMonth(year, month) {
+    return new Date(year, month+1, 0, 12);
+  }
+  
+  function numDaysInMonth(year, month) {
+    return lastDayOfMonth(year, month).getDate();
+  }
+  
+  function numRowsForMonth(year, month) {
+    let firstMonday = firstMondayInMonth(year, month);
+    let daysInMonth = numDaysInMonth(year, month);
+    return Math.floor((daysInMonth - firstMonday.getDate())/7) + 1;
+  }
+  
+  function firstDayOfCalendar() {
+    if(options.includePrevDec) {
+      //If we start with previous december, start with the first Monday in December
+      return firstMondayInMonth(options.year-1, DEC);
+    }
+    else {
+      //Otherwise, we start with the Monday the week of Jan 1
+      let d = firstMondayInMonth(options.year, JAN);
+      //if first monday is 4th or higher, we need to go back a week to ensure that we include Jan 1 on the calendar.
+      if(d.getDate() > 3)
+        d.setDate(d.getDate() - 7);
+      return d;
+    }
+  }
+  
+  function lastDayOfCalendar() {
+    if(options.includeNextJan) {
+      //If we end with next January, go to the last Friday in that January.
+      return lastFridayInMonth(options.year+1, JAN);
+    }
+    else {
+      //Otherwise, start with the last Friday in December.
+      let d = lastFridayInMonth(options.year, DEC);
+      //if last friday in month is before 29th, we need to go ahead a week to ensure all of Dec is on the calendar.
+      if(d.getDate() < 29)
+        d.setDate(d.getDate() + 7);
+      return d;
+    }
+  }
+  
+  function generateCalendar() {
+    let html = '';
+    html += `<table>`;
+    html += `<tr><th colspan="6">${options.year}</th></tr>`;
+    html += `<tr><th></th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th></tr>`;
+    
+    const start = firstDayOfCalendar();
+    const end = lastDayOfCalendar();
+    const holidays = new Set(options.holidays.replace(/(^|\D)0+/g, '$1').split(/\s+/));
+    const ptoDays = new Set(options.ptoDays.replace(/(^|\D)0+/g, '$1').split(/\s+/));
+    
+    let currMonth = -1;
+    let daysInMonth = 0;
+    
+    for(let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const dayOfMonth = d.getDate();
+      const dayOfWeek = d.getDay();
+      
+      const classNames = [];
+      if(year !== options.year)
+        classNames.push('different-year');
+      
+      //do nothing for weekends
+      if(dayOfWeek === SAT || dayOfWeek === SUN)
+        continue;
+      
+      if(dayOfWeek === MON) {
+        html += `<tr>`;
+        if(month !== currMonth) {
+          //we are starting a new month
+          currMonth = month;
+          daysInMonth = numDaysInMonth(year, month);
+          
+          let monthLabel = MONTHS[month];
+          let numRows = numRowsForMonth(year, month);
+          if(year !== options.year) {
+            if((month === DEC && !options.includePrevDec) || (month === JAN && !options.includeNextJan)) {
+              monthLabel = '';
+              numRows = 1;
+            }
+          }
+          
+          html += `<th rowspan="${numRows}" class="${classNames.join(' ')}"><div class="month">${monthLabel}</div></th>`;
+        }
+      }
+      
+      if(dayOfWeek === MON || dayOfMonth === 1)
+        classNames.push('month-border-left');
+      if(dayOfWeek === FRI || dayOfMonth === daysInMonth)
+        classNames.push('month-border-right');
+      if(dayOfMonth <= 7 || (year < options.year && dayOfMonth - start.getDate() < 5))
+        classNames.push('month-border-top');
+      if(dayOfMonth > daysInMonth - 7 || (year > options.year && end.getDate() - dayOfMonth < 5))
+        classNames.push('month-border-bottom');
+      
+      if(year === options.year) {
+        if(holidays.has(`${month+1}/${dayOfMonth}`))
+          classNames.push('holiday');
+        
+        if(ptoDays.has(`${month+1}/${dayOfMonth}`))
+         classNames.push('pto-day');
+      }
+      
+      html += `<td class="${classNames.join(' ')}">${dayOfMonth}</td>`;
+      
+      if(dayOfWeek === FRI)
+        html += `</tr>`;
+    }
+    
+    
+    html += `</table>`;
+    
+    $('#calendar').html(html);
+  };
+  
+  
+  generateCalendar();
+});
+//]]> 
+</script>
+</head>
+<body>
+<div id="calendar"></div>
+<div id="controls">
+  <h2>Options</h2>
+  <label for="year">Year:</label> <input type="number" id="year" min="1000" max="9999" /><br/>
+  <label for="includePrevDec">Include previous December</label> <input type="checkbox" id="includePrevDec" /><br/>
+  <label for="includeNextJan">Include next January</label> <input type="checkbox" id="includeNextJan" /><br/>
+  <div class="datelist">
+    <label for="holidays">Holidays (mm/dd, one per line):</label><br/>
+    <textarea id="holidays"></textarea>
+  </div>
+  <div class="datelist">
+    <label for="ptoDays">PTO Days (mm/dd, one per line):</label><br/>
+    <textarea id="ptoDays"></textarea>
+  </div><br/>
+  <button id="print">Print</button>
+</div>
+</body>
+</html>
