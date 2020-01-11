@@ -114,6 +114,10 @@ $(function() {
     window.print();
   });
   
+  generateCalendar();
+  
+  //---------------------------------------------
+  
   function loadOptions() {
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem('mini-calendar')) }
@@ -211,6 +215,30 @@ $(function() {
     }
   }
   
+  function parseDateList(dateList) {
+    const res = new Set();
+    const dates = dateList.split(/\s+/g);
+    
+    for(const date of dates) {
+      const matches = date.match(/^0*(\d\d?)\/0*(\d\d?)(?:-0*(\d\d?)\/0*(\d\d?))?/);
+      if(!matches)
+        continue;
+      
+      const startMonth = Number(matches[1]);
+      const startDay = Number(matches[2]);
+      const endMonth = Number(matches[3]) || startMonth;
+      const endDay = Number(matches[4]) || startDay;
+      
+      const incrementDate = (m, d) => ({m: (m + Number(d >= 31) - 1)%12 + 1, d: d%31 + 1});
+      
+      for(let m = startMonth, d = startDay; m < endMonth || (m === endMonth && d <= endDay); {m,d} = incrementDate(m,d)) {
+        res.add(`${m}/${d}`);
+      }
+    }
+    
+    return res;
+  }
+  
   function generateCalendar() {
     let html = '';
     html += `<table>`;
@@ -219,8 +247,8 @@ $(function() {
     
     const start = firstDayOfCalendar();
     const end = lastDayOfCalendar();
-    const holidays = new Set(options.holidays.replace(/(^|\D)0+/g, '$1').split(/\s+/));
-    const ptoDays = new Set(options.ptoDays.replace(/(^|\D)0+/g, '$1').split(/\s+/));
+    const holidays = parseDateList(options.holidays);
+    const ptoDays = parseDateList(options.ptoDays);
     
     let currMonth = -1;
     let daysInMonth = 0;
@@ -288,8 +316,6 @@ $(function() {
     $('#calendar').html(html);
   };
   
-  
-  generateCalendar();
 });
 //]]> 
 </script>
