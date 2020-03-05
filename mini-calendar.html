@@ -33,6 +33,9 @@ h2 {
   font-weight: bold;
   font-size: 1.2em;
 }
+a, a:visited, a:active {
+  color: blue;
+}
 #calendar {
   display: inline-block;
   width: 3cm;
@@ -121,11 +124,11 @@ $(function() {
   //---------------------------------------------
   
   function loadOptions() {
-    //TODO: check for serialized options in URL string
-    
-    let saved = null;
-    try { saved = JSON.parse(localStorage.getItem('mini-calendar')) }
-    catch (e) { console.error(e); }
+    let saved = deserializeOptions();
+    if(!saved) {
+      try { saved = JSON.parse(localStorage.getItem('mini-calendar')) }
+      catch (e) { console.error(e); }
+    }
     
     if(!saved)
       saved = {};
@@ -182,7 +185,57 @@ $(function() {
     const serializedHolidays = serializeRangeList(parseDateList(options.holidays).rangeList);
     const serializedPtoDays = serializeRangeList(parseDateList(options.ptoDays).rangeList);
     
-    $('#permalink').text(serializedYear + serializedFlags + serializedHolidays + '-' + serializedPtoDays);
+    const hash = serializedYear + serializedFlags + serializedHolidays + '-' + serializedPtoDays;
+    location.hash = hash;
+    $('#permalink').attr('href', '#' + hash);
+  }
+  
+  function deserializeOptions() {
+    const deserializeRangeList = (s => {
+      if(s.length % 2 !== 0)
+        return null;
+      
+      const rangeList = [];
+      for(let i = 0; i < s.length; i+=2) {
+        const d = parseInt(s.substr(i,2), 36);
+        if(d < 366) {
+          rangeList.push({start: d});
+        }
+        else {
+          if(i === 0 || d >= 366*2 || rangeList[rangeList.length-1].end !== undefined)
+            return null;
+          rangeList[rangeList.length-1].end = d - 366;
+        }
+      }
+      
+      return rangeList.map(range => DOY[range.start] + (range.end === undefined ? '' : `-${DOY[range.end]}`)).join('\n');
+    });
+    
+    const hash = location.hash.replace(/^#/, '');
+    if(hash === '')
+      return null;
+    
+    const matches = hash.match(/^(...)(.)([^\-]*)\-(.*)$/);
+    if(!matches)
+      return null;
+    
+    const year = parseInt(matches[1], 36);
+    const flags = parseInt(matches[2], 36);
+    const includePrevDec = !!(flags & (1 << 0));
+    const includeNextJan = !!(flags & (1 << 1));
+    const holidays = deserializeRangeList(matches[3]);
+    const ptoDays = deserializeRangeList(matches[4]);
+    
+    if(holidays === null || ptoDays === null)
+      return null;
+    
+    return {
+      year,
+      includePrevDec,
+      includeNextJan,
+      holidays,
+      ptoDays,
+    };
   }
   
   function firstMondayInMonth(year, month) {
