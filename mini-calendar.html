@@ -185,9 +185,12 @@ $(function() {
     const serializedHolidays = serializeRangeList(parseDateList(options.holidays).rangeList);
     const serializedPtoDays = serializeRangeList(parseDateList(options.ptoDays).rangeList);
     
-    const hash = serializedYear + serializedFlags + serializedHolidays + '-' + serializedPtoDays;
-    location.hash = hash;
-    $('#permalink').attr('href', '#' + hash);
+    const hash = '#' + serializedYear + serializedFlags + serializedHolidays + '-' + serializedPtoDays;
+    
+    //if hash is set and it no longer matches current page content, clear the hash from url.
+    if(location.hash !== '' && location.hash !== hash)
+      location.hash = '';
+    $('#permalink').attr('href', hash);
   }
   
   function deserializeOptions() {
