@@ -26,7 +26,7 @@ body {
   padding-right: 5px;
 }
 textarea {
-  min-width: 200px;
+  min-width: 250px;
   min-height: 400px;
 }
 h2 {
@@ -421,12 +421,12 @@ $(function() {
   <label for="includeNextJan">Include next January</label> <input type="checkbox" id="includeNextJan" /><br/>
   <a href="#" id="permalink">Permalink</a><br/>
   <div class="datelist">
-    <label for="holidays">Holidays (mm/dd, one per line):</label><br/>
-    <textarea id="holidays"></textarea>
+    <label for="holidays"><b>Holidays</b><br/>
+    <textarea id="holidays" placeholder="Enter dates in m/d format, one per line.&#10;You can enter ranges like m/d-m/d."></textarea>
   </div>
   <div class="datelist">
-    <label for="ptoDays">PTO Days (mm/dd, one per line):</label><br/>
-    <textarea id="ptoDays"></textarea>
+    <label for="ptoDays"><b>PTO Days</b></label><br/>
+    <textarea id="ptoDays" placeholder="Enter dates in m/d format, one per line.&#10;You can enter ranges like m/d-m/d."></textarea>
   </div><br/>
   <button id="print">Print</button>
 </div>
