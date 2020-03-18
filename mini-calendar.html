@@ -78,15 +78,31 @@ a, a:visited, a:active {
 .datelist + .datelist {
   padding-left: 0.5rem;
 }
+.color-group input[type=radio] {
+  display: none;
+}
+.color-group label {
+  display: inline-block;
+  width: 0.5cm;
+  height: 0.375cm;
+  border: 1px solid black;
+  cursor: pointer;
+}
+.color-group input[type=radio]:checked + label {
+  border-width: 2px;
+  width: calc(0.5cm - 2px);
+  height: calc(0.375cm - 2px);
+}
+
 .different-year {
   color: #888;
 }
-.holiday {
-  background-color: #F79646;
-}
-.pto-day {
-  background-color: #ffff00;
-}
+.highlight-1 { background-color: #faa; }
+.highlight-2 { background-color: #ffa357; }
+.highlight-3 { background-color: #ff0; }
+.highlight-4 { background-color: #6bff9f; }
+.highlight-5 { background-color: #95d5fd; }
+.highlight-6 { background-color: #d8c5ff; }
 .holiday-lookup {
   position: relative;
   display: inline-block;
@@ -137,12 +153,14 @@ $(function() {
   $('#includePrevDec')[0].checked = options.includePrevDec;
   $('#includeNextJan')[0].checked = options.includeNextJan;
   $('#holidays').val(options.holidays);
+  $('input[name="holidayColor"]').val([options.holidayColor]);
   $('#ptoDays').val(options.ptoDays);
+  $('input[name="ptoDayColor"]').val([options.ptoDayColor]);
   $('.holiday-lookup .holiday-lookup-button').on('click', () => $('.holiday-lookup .holiday-lookup-dialog').toggle());
   $('#holidays').on('focus', () => $('.holiday-lookup .holiday-lookup-dialog').hide());
   $('.holiday-lookup .add-holiday').on('click', addHoliday);
   
-  $('#year, #includePrevDec, #includeNextJan, #holidays, #ptoDays').on('change click keyup', updateOptions);
+  $('#year, #includePrevDec, #includeNextJan, #holidays, #ptoDays, #holidayColorGroup input, #ptoDayColorGroup input').on('change click keyup', updateOptions);
   
   $('#print').on('click', function() {
     alert('Be sure to enable "Background graphics" options to get highlighted days.');
@@ -168,7 +186,9 @@ $(function() {
       includePrevDec: ('boolean' === typeof saved.includePrevDec ? saved.includePrevDec : true),
       includeNextJan: ('boolean' === typeof saved.includeNextJan ? saved.includeNextJan : true),
       holidays: saved.holidays || '',
+      holidayColor: saved.holidayColor || 2,
       ptoDays: saved.ptoDays || '',
+      ptoDayColor: saved.ptoDayColor || 3,
     };
   }
   
@@ -186,7 +206,9 @@ $(function() {
     options.includePrevDec = !!($('#includePrevDec')[0].checked);
     options.includeNextJan = !!($('#includeNextJan')[0].checked);
     options.holidays = $('#holidays').val();
+    options.holidayColor = $('input[name="holidayColor"]:checked').val();
     options.ptoDays = $('#ptoDays').val();
+    options.ptoDayColor = $('input[name="ptoDayColor"]:checked').val();
     
     serializeOptions();
     try { localStorage.setItem('mini-calendar', JSON.stringify(options)); }
@@ -208,14 +230,16 @@ $(function() {
     
     const serializedYear = options.year.toString(36).padStart(3,0);
     const serializedFlags = (
-      (Number(options.includePrevDec) << 0) +
-      (Number(options.includeNextJan) << 1)
+      ((Number(options.includePrevDec) & 1) << 0) +
+      ((Number(options.includeNextJan) & 1) << 1) + 
+      (((Number(options.holidayColor)-1) & 7) << 2) +
+      (((Number(options.ptoDayColor)-1) & 7)  << 5)
     ).toString(36);
     
     const serializedHolidays = serializeRangeList(parseDateList(options.holidays).rangeList);
     const serializedPtoDays = serializeRangeList(parseDateList(options.ptoDays).rangeList);
     
-    const hash = '#' + serializedYear + serializedFlags + serializedHolidays + '-' + serializedPtoDays;
+    const hash = '#' + serializedYear + serializedFlags + "-" + serializedHolidays + '-' + serializedPtoDays;
     
     //if hash is set and it no longer matches current page content, clear the hash from url.
     if(location.hash !== '' && location.hash !== hash)
@@ -248,14 +272,16 @@ $(function() {
     if(hash === '')
       return null;
     
-    const matches = hash.match(/^(...)(.)([^\-]*)\-(.*)$/);
+    const matches = hash.match(/^(...)([^\-]+)-([^\-]*)\-(.*)$/);
     if(!matches)
       return null;
     
     const year = parseInt(matches[1], 36);
     const flags = parseInt(matches[2], 36);
-    const includePrevDec = !!(flags & (1 << 0));
-    const includeNextJan = !!(flags & (1 << 1));
+    const includePrevDec = !!((flags >> 0) & 1);
+    const includeNextJan = !!((flags >> 1) & 1);
+    const holidayColor = String(((flags >> 2) & 7) + 1);
+    const ptoDayColor = String(((flags >> 5) & 7) + 1);
     const holidays = deserializeRangeList(matches[3]);
     const ptoDays = deserializeRangeList(matches[4]);
     
@@ -267,7 +293,9 @@ $(function() {
       includePrevDec,
       includeNextJan,
       holidays,
+      holidayColor,
       ptoDays,
+      ptoDayColor,
     };
   }
   
@@ -478,10 +506,10 @@ $(function() {
       
       if(year === options.year) {
         if(holidays.has(`${month+1}/${dayOfMonth}`))
-          classNames.push('holiday');
+          classNames.push(`highlight-${options.holidayColor}`);
         
         if(ptoDays.has(`${month+1}/${dayOfMonth}`))
-         classNames.push('pto-day');
+         classNames.push(`highlight-${options.ptoDayColor}`);
       }
       
       html += `<td class="${classNames.join(' ')}">${dayOfMonth}</td>`;
@@ -531,11 +559,26 @@ $(function() {
         <a class="add-holiday" data-holiday="newYearsEve" href="#">New Year's Eve</a>
       </div>
     </div>
-    <br/>
+    <div id="holidayColorGroup" class="color-group">
+      <input type="radio" name="holidayColor" value="1" id="holidayColor-1" /> <label for="holidayColor-1" class="highlight-1"></label>
+      <input type="radio" name="holidayColor" value="2" id="holidayColor-2" /> <label for="holidayColor-2" class="highlight-2"></label>
+      <input type="radio" name="holidayColor" value="3" id="holidayColor-3" /> <label for="holidayColor-3" class="highlight-3"></label>
+      <input type="radio" name="holidayColor" value="4" id="holidayColor-4" /> <label for="holidayColor-4" class="highlight-4"></label>
+      <input type="radio" name="holidayColor" value="5" id="holidayColor-5" /> <label for="holidayColor-5" class="highlight-5"></label>
+      <input type="radio" name="holidayColor" value="6" id="holidayColor-6" /> <label for="holidayColor-6" class="highlight-6"></label>
+    </div>
     <textarea id="holidays" placeholder="Enter dates in m/d format, one per line.&#10;You can enter ranges like m/d-m/d."></textarea>
   </div>
   <div class="datelist">
-    <label for="ptoDays"><b>PTO Days</b></label><br/>
+    <label for="ptoDays"><b>PTO Days</b></label>
+    <div  id="ptoDayColorGroup"class="color-group">
+      <input type="radio" name="ptoDayColor" value="1" id="ptoDayColor-1" /> <label for="ptoDayColor-1" class="highlight-1"></label>
+      <input type="radio" name="ptoDayColor" value="2" id="ptoDayColor-2" /> <label for="ptoDayColor-2" class="highlight-2"></label>
+      <input type="radio" name="ptoDayColor" value="3" id="ptoDayColor-3" /> <label for="ptoDayColor-3" class="highlight-3"></label>
+      <input type="radio" name="ptoDayColor" value="4" id="ptoDayColor-4" /> <label for="ptoDayColor-4" class="highlight-4"></label>
+      <input type="radio" name="ptoDayColor" value="5" id="ptoDayColor-5" /> <label for="ptoDayColor-5" class="highlight-5"></label>
+      <input type="radio" name="ptoDayColor" value="6" id="ptoDayColor-6" /> <label for="ptoDayColor-6" class="highlight-6"></label>
+    </div>
     <textarea id="ptoDays" placeholder="Enter dates in m/d format, one per line.&#10;You can enter ranges like m/d-m/d."></textarea>
   </div><br/>
   <button id="print">Print</button>
