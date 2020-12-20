@@ -28,6 +28,7 @@ body {
 textarea {
   min-width: 250px;
   min-height: 400px;
+  padding: 3px;
 }
 h2 {
   font-weight: bold;
@@ -90,6 +91,13 @@ a, a:visited, a:active {
 }
 .color-group input[type=radio]:checked + label {
   outline: 1px solid black;
+}
+#copyright {
+  text-align: center;
+  font-size: 0.7rem;
+  position: relative;
+  height: 0;
+  top: 0.5rem;
 }
 
 .different-year {
@@ -580,6 +588,7 @@ $(function() {
     <textarea id="ptoDays" placeholder="Enter dates in m/d format, one per line.&#10;You can enter ranges like m/d-m/d."></textarea>
   </div><br/>
   <button id="print">Print</button>
+  <div id="copyright">MiniCalendar created by Kip Robinson. Details at <a href="https://github.com/kiprobinson/minicalendar">GitHub</a>.</div>
 </div>
 </body>
 </html>
