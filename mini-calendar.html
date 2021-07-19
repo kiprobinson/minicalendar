@@ -342,6 +342,7 @@ $(function() {
       easter: (y) => easterDate(y),
       easterMonday: (y) => { const d = easterDate(y); d.setDate(d.getDate()+1); return d; },
       memorialDay: (y) => nthDayOfMonth(y, MAY, -1, MON),
+      juneteenth: (y) => new Date(y,JUN,19),
       independenceDay: (y) => new Date(y,JUL,4),
       laborDay: (y) => nthDayOfMonth(y, SEP, 1, MON),
       columbusDay: (y) => nthDayOfMonth(y, OCT, 2, MON),
@@ -553,6 +554,7 @@ $(function() {
         <a class="add-holiday" data-holiday="goodFriday" href="#">Good Friday</a>
         <a class="add-holiday" data-holiday="easterMonday" href="#">Easter Monday</a>
         <a class="add-holiday" data-holiday="memorialDay" href="#">Memorial Day</a>
+        <a class="add-holiday" data-holiday="juneteenth" href="#">Juneteenth</a>
         <a class="add-holiday" data-holiday="independenceDay" href="#">Independence Day</a>
         <a class="add-holiday" data-holiday="laborDay" href="#">Labor Day</a>
         <a class="add-holiday" data-holiday="columbusDay" href="#">Columbus Day</a>
