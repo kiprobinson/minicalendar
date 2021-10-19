@@ -141,6 +141,7 @@ a, a:visited, a:active {
 .holiday-lookup .holiday-lookup-dialog .add-holiday {
   display: block;
   color: #00f;
+  padding-bottom: 0.25rem;
 }
 .holiday-lookup .holiday-lookup-dialog .add-holiday:hover {
   color: #88f;
@@ -354,7 +355,8 @@ $(function() {
       juneteenth: (y) => new Date(y,JUN,19),
       independenceDay: (y) => new Date(y,JUL,4),
       laborDay: (y) => nthDayOfMonth(y, SEP, 1, MON),
-      columbusDay: (y) => nthDayOfMonth(y, OCT, 2, MON),
+      indigenousPeoplesDay: (y) => nthDayOfMonth(y, OCT, 2, MON),
+      veteransDay: (y) => new Date(y,NOV,11),
       electionDay: (y) => { const d = nthDayOfMonth(y, NOV, 1, MON); d.setDate(d.getDate() + 1); return d; },
       thanksgiving: (y) => nthDayOfMonth(y, NOV, 4, THU),
       blackFriday: (y) => { const d = nthDayOfMonth(y, NOV, 4, THU); d.setDate(d.getDate() + 1); return d; },
@@ -566,8 +568,10 @@ $(function() {
         <a class="add-holiday" data-holiday="juneteenth" href="#">Juneteenth</a>
         <a class="add-holiday" data-holiday="independenceDay" href="#">Independence Day</a>
         <a class="add-holiday" data-holiday="laborDay" href="#">Labor Day</a>
-        <a class="add-holiday" data-holiday="columbusDay" href="#">Columbus Day</a>
+        <a class="add-holiday" data-holiday="indigenousPeoplesDay" href="#">Indigenous Peoples' Day</a>
+        <a class="add-holiday" data-holiday="indigenousPeoplesDay" href="#">Columbus Day</a>
         <a class="add-holiday" data-holiday="electionDay" href="#">Election Day</a>
+        <a class="add-holiday" data-holiday="veteransDay" href="#">Veterans Day</a>
         <a class="add-holiday" data-holiday="thanksgiving" href="#">Thanksgiving</a>
         <a class="add-holiday" data-holiday="blackFriday" href="#">Black Friday</a>
         <a class="add-holiday" data-holiday="christmasEve" href="#">Christmas Eve</a>
