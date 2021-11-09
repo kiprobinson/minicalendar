@@ -57,6 +57,8 @@ a, a:visited, a:active {
   width: 0.5cm;
   height: 0.375cm;
   padding: 0 0.03cm;
+  -webkit-print-color-adjust: exact;
+  color-adjust: exact;
 }
 #calendar table th {
   border: 2px solid black;
@@ -179,7 +181,6 @@ $(function() {
   $('#year, #includePrevDec, #includeNextJan, #holidays, #ptoDays, #holidayColorGroup input, #ptoDayColorGroup input').on('change click keyup', updateOptions);
   
   $('#print').on('click', function() {
-    alert('Be sure to enable "Background graphics" options to get highlighted days.');
     window.print();
   });
   
