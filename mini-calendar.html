@@ -19,6 +19,8 @@ file in a browser from your local machine and run it directly.
 html{color:#000;background:#FFF}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0}table{border-collapse:collapse;border-spacing:0}fieldset,img{border:0}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal}ol,ul{list-style:none}caption,th{text-align:left}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}q:before,q:after{content:''}abbr,acronym{border:0;font-variant:normal}sup{vertical-align:text-top}sub{vertical-align:text-bottom}input,textarea,select,button{font-family:inherit;font-size:inherit;font-weight:inherit;*font-size:100%}legend{color:#000}#yui3-css-stamp.cssreset{display:none}
 /* --- end Yahoo reset script --- */
 
+*{box-sizing: border-box}
+
 html {
   background-color: white;
 }
@@ -54,21 +56,26 @@ a, a:visited, a:active {
   font-weight: 300;
   border: 1px solid #888;
   text-align: right;
-  width: 0.5cm;
-  height: 0.375cm;
+  height: 0.4cm;
   padding: 0 0.03cm;
   -webkit-print-color-adjust: exact;
   color-adjust: exact;
+  line-height: 0;
 }
 #calendar table th {
   border: 2px solid black;
   text-align: center;
   font-weight: 700;
 }
+#calendar table th.month-col {
+  width: 0.4cm;
+}
+#calendar table th.day-col {
+  width: 0.52cm;
+}
 #calendar table .month {
   writing-mode: vertical-lr;
   transform: rotate(180deg);
-  min-width: 0.6rem;
 }
 #controls {
   display: inline-block;
@@ -489,7 +496,7 @@ $(function() {
     let html = '';
     html += `<table>`;
     html += `<tr><th colspan="6">${options.year}</th></tr>`;
-    html += `<tr><th></th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th></tr>`;
+    html += `<tr><th class="month-col"></th><th class="day-col">M</th><th class="day-col">T</th><th class="day-col">W</th><th class="day-col">T</th><th class="day-col">F</th></tr>`;
     
     const start = firstDayOfCalendar();
     const end = lastDayOfCalendar();
