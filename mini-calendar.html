@@ -76,6 +76,9 @@ a, a:visited, a:active {
   border: 1px solid black;
   padding: 0.5em;
 }
+.radioOption {
+  margin-left: 0.5rem;
+}
 #calendar table td.month-border-top    { border-top:    2px solid black; }
 #calendar table td.month-border-bottom { border-bottom: 2px solid black; }
 #calendar table td.month-border-left   { border-left:   2px solid black; }
@@ -166,10 +169,16 @@ $(function() {
   const MONTHS = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
   const DOY = '1/1,1/2,1/3,1/4,1/5,1/6,1/7,1/8,1/9,1/10,1/11,1/12,1/13,1/14,1/15,1/16,1/17,1/18,1/19,1/20,1/21,1/22,1/23,1/24,1/25,1/26,1/27,1/28,1/29,1/30,1/31,2/1,2/2,2/3,2/4,2/5,2/6,2/7,2/8,2/9,2/10,2/11,2/12,2/13,2/14,2/15,2/16,2/17,2/18,2/19,2/20,2/21,2/22,2/23,2/24,2/25,2/26,2/27,2/28,2/29,3/1,3/2,3/3,3/4,3/5,3/6,3/7,3/8,3/9,3/10,3/11,3/12,3/13,3/14,3/15,3/16,3/17,3/18,3/19,3/20,3/21,3/22,3/23,3/24,3/25,3/26,3/27,3/28,3/29,3/30,3/31,4/1,4/2,4/3,4/4,4/5,4/6,4/7,4/8,4/9,4/10,4/11,4/12,4/13,4/14,4/15,4/16,4/17,4/18,4/19,4/20,4/21,4/22,4/23,4/24,4/25,4/26,4/27,4/28,4/29,4/30,5/1,5/2,5/3,5/4,5/5,5/6,5/7,5/8,5/9,5/10,5/11,5/12,5/13,5/14,5/15,5/16,5/17,5/18,5/19,5/20,5/21,5/22,5/23,5/24,5/25,5/26,5/27,5/28,5/29,5/30,5/31,6/1,6/2,6/3,6/4,6/5,6/6,6/7,6/8,6/9,6/10,6/11,6/12,6/13,6/14,6/15,6/16,6/17,6/18,6/19,6/20,6/21,6/22,6/23,6/24,6/25,6/26,6/27,6/28,6/29,6/30,7/1,7/2,7/3,7/4,7/5,7/6,7/7,7/8,7/9,7/10,7/11,7/12,7/13,7/14,7/15,7/16,7/17,7/18,7/19,7/20,7/21,7/22,7/23,7/24,7/25,7/26,7/27,7/28,7/29,7/30,7/31,8/1,8/2,8/3,8/4,8/5,8/6,8/7,8/8,8/9,8/10,8/11,8/12,8/13,8/14,8/15,8/16,8/17,8/18,8/19,8/20,8/21,8/22,8/23,8/24,8/25,8/26,8/27,8/28,8/29,8/30,8/31,9/1,9/2,9/3,9/4,9/5,9/6,9/7,9/8,9/9,9/10,9/11,9/12,9/13,9/14,9/15,9/16,9/17,9/18,9/19,9/20,9/21,9/22,9/23,9/24,9/25,9/26,9/27,9/28,9/29,9/30,10/1,10/2,10/3,10/4,10/5,10/6,10/7,10/8,10/9,10/10,10/11,10/12,10/13,10/14,10/15,10/16,10/17,10/18,10/19,10/20,10/21,10/22,10/23,10/24,10/25,10/26,10/27,10/28,10/29,10/30,10/31,11/1,11/2,11/3,11/4,11/5,11/6,11/7,11/8,11/9,11/10,11/11,11/12,11/13,11/14,11/15,11/16,11/17,11/18,11/19,11/20,11/21,11/22,11/23,11/24,11/25,11/26,11/27,11/28,11/29,11/30,12/1,12/2,12/3,12/4,12/5,12/6,12/7,12/8,12/9,12/10,12/11,12/12,12/13,12/14,12/15,12/16,12/17,12/18,12/19,12/20,12/21,12/22,12/23,12/24,12/25,12/26,12/27,12/28,12/29,12/30,12/31'.split(/,/);
   const DOY_REV = DOY.reduce((acc,val,i) => ({...acc, [val]:i}), {});
+  const DOY_EU = DOY.map(s => s.replace(/^(\d+)\/(\d+)$/, '$2/$1'));
+  const DOY_REV_EU = DOY_EU.reduce((acc,val,i) => ({...acc, [val]:i}), {});
+  const DATELIST_PLACEHOLDER = 'Enter dates in m/d format, one per line.\nYou can enter ranges like m/d-m/d.';
+  const DATELIST_PLACEHOLDER_EU = 'Enter dates in d/m format, one per line.\nYou can enter ranges like d/m-d/m.';
   const options = loadOptions();
   $('#year').val(options.year);
   $('#includePrevDec')[0].checked = options.includePrevDec;
   $('#includeNextJan')[0].checked = options.includeNextJan;
+  $('#useMMDD_true')[0].checked = options.useMMDD;
+  $('#useMMDD_false')[0].checked = !options.useMMDD;
   $('#holidays').val(options.holidays);
   $('input[name="holidayColor"]').val([options.holidayColor]);
   $('#ptoDays').val(options.ptoDays);
@@ -178,7 +187,7 @@ $(function() {
   $('#holidays').on('focus', () => $('.holiday-lookup .holiday-lookup-dialog').hide());
   $('.holiday-lookup .add-holiday').on('click', addHoliday);
   
-  $('#year, #includePrevDec, #includeNextJan, #holidays, #ptoDays, #holidayColorGroup input, #ptoDayColorGroup input').on('change click keyup', updateOptions);
+  $('#year, #includePrevDec, #includeNextJan, input[name=useMMDD], #holidays, #ptoDays, #holidayColorGroup input, #ptoDayColorGroup input').on('change click keyup', updateOptions);
   
   $('#print').on('click', function() {
     window.print();
@@ -206,6 +215,7 @@ $(function() {
       holidayColor: saved.holidayColor || 2,
       ptoDays: saved.ptoDays || '',
       ptoDayColor: saved.ptoDayColor || 3,
+      useMMDD: ('boolean' === typeof saved.useMMDD ? saved.useMMDD : true),
     };
   }
   
@@ -222,10 +232,13 @@ $(function() {
     options.year = Math.floor(year);
     options.includePrevDec = !!($('#includePrevDec')[0].checked);
     options.includeNextJan = !!($('#includeNextJan')[0].checked);
+    options.useMMDD = !!($('#useMMDD_true')[0].checked);
     options.holidays = $('#holidays').val();
     options.holidayColor = $('input[name="holidayColor"]:checked').val();
     options.ptoDays = $('#ptoDays').val();
     options.ptoDayColor = $('input[name="ptoDayColor"]:checked').val();
+    
+    $('#holidays, #ptoDays').attr('placeholder', options.useMMDD ? DATELIST_PLACEHOLDER : DATELIST_PLACEHOLDER_EU);
     
     serializeOptions();
     try { localStorage.setItem('mini-calendar', JSON.stringify(options)); }
@@ -250,7 +263,8 @@ $(function() {
       ((Number(options.includePrevDec) & 1) << 0) +
       ((Number(options.includeNextJan) & 1) << 1) + 
       (((Number(options.holidayColor)-1) & 7) << 2) +
-      (((Number(options.ptoDayColor)-1) & 7)  << 5)
+      (((Number(options.ptoDayColor)-1) & 7)  << 5) +
+      ((Number(options.useMMDD) & 1) << 8)
     ).toString(36);
     
     const serializedHolidays = serializeRangeList(parseDateList(options.holidays).rangeList);
@@ -265,7 +279,7 @@ $(function() {
   }
   
   function deserializeOptions() {
-    const deserializeRangeList = (s => {
+    const deserializeRangeList = ((s, useMMDD) => {
       if(s.length % 2 !== 0)
         return null;
       
@@ -282,7 +296,8 @@ $(function() {
         }
       }
       
-      return rangeList.map(range => DOY[range.start] + (range.end === undefined ? '' : `-${DOY[range.end]}`)).join('\n');
+      const doyMap = useMMDD ? DOY : DOY_EU;
+      return rangeList.map(range => doyMap[range.start] + (range.end === undefined ? '' : `-${doyMap[range.end]}`)).join('\n');
     });
     
     const hash = location.hash.replace(/^#/, '');
@@ -299,8 +314,9 @@ $(function() {
     const includeNextJan = !!((flags >> 1) & 1);
     const holidayColor = String(((flags >> 2) & 7) + 1);
     const ptoDayColor = String(((flags >> 5) & 7) + 1);
-    const holidays = deserializeRangeList(matches[3]);
-    const ptoDays = deserializeRangeList(matches[4]);
+    const useMMDD = !!((flags >> 8) & 1);
+    const holidays = deserializeRangeList(matches[3], useMMDD);
+    const ptoDays = deserializeRangeList(matches[4], useMMDD);
     
     if(holidays === null || ptoDays === null)
       return null;
@@ -309,6 +325,7 @@ $(function() {
       year,
       includePrevDec,
       includeNextJan,
+      useMMDD,
       holidays,
       holidayColor,
       ptoDays,
@@ -431,10 +448,11 @@ $(function() {
     }
   }
   
-  function parseDateList(dateList, format='set') {
+  function parseDateList(dateList) {
     const dateSet = new Set();
     const rangeList = [];
     const dates = dateList.split(/[\s,]+/g);
+    const doyRevMap = options.useMMDD ? DOY_REV : DOY_REV_EU;
     
     for(const date of dates) {
       const matches = date.match(/^0*(\d\d?)\/0*(\d\d?)(?:-0*(\d\d?)\/0*(\d\d?))?/);
@@ -449,15 +467,15 @@ $(function() {
       const start = `${startMonth}/${startDay}`;
       const end = `${endMonth}/${endDay}`;
       
-      const startDoy = DOY_REV[start];
-      const endDoy = DOY_REV[end];
+      const startDoy = doyRevMap[start];
+      const endDoy = doyRevMap[end];
       if(startDoy === undefined || endDoy === undefined)
         continue;
       
       rangeList.push({start: startDoy, end: (endDoy === startDoy ? undefined : endDoy)});
       
       for(let i = startDoy; i <= endDoy; i++)
-        dateSet.add(DOY[i]);
+        dateSet.add(i);
     }
     
     return {
@@ -524,10 +542,11 @@ $(function() {
         classNames.push('month-border-bottom');
       
       if(year === options.year) {
-        if(holidays.has(`${month+1}/${dayOfMonth}`))
+        const doy = DOY_REV[`${month+1}/${dayOfMonth}`];
+        if(holidays.has(doy))
           classNames.push(`highlight-${options.holidayColor}`);
         
-        if(ptoDays.has(`${month+1}/${dayOfMonth}`))
+        if(ptoDays.has(doy))
          classNames.push(`highlight-${options.ptoDayColor}`);
       }
       
@@ -554,6 +573,10 @@ $(function() {
   <label for="year">Year:</label> <input type="number" id="year" min="1000" max="9999" /><br/>
   <label for="includePrevDec">Include previous December</label> <input type="checkbox" id="includePrevDec" /><br/>
   <label for="includeNextJan">Include next January</label> <input type="checkbox" id="includeNextJan" /><br/>
+  Date format:
+    <span class="radioOption"><label for="useMMDD_true" ><input type="radio" id="useMMDD_true"  name="useMMDD" value="true"  /> m/d</label></span>
+    <span class="radioOption"><label for="useMMDD_false"><input type="radio" id="useMMDD_false" name="useMMDD" value="false" /> d/m</label></span>
+  <br/>
   <a href="#" id="permalink">Permalink</a><br/>
   <div class="datelist">
     <label for="holidays"><b>Holidays</b></label>
@@ -589,7 +612,7 @@ $(function() {
       <input type="radio" name="holidayColor" value="5" id="holidayColor-5" /> <label for="holidayColor-5" class="highlight-5"></label>
       <input type="radio" name="holidayColor" value="6" id="holidayColor-6" /> <label for="holidayColor-6" class="highlight-6"></label>
     </div>
-    <textarea id="holidays" placeholder="Enter dates in m/d format, one per line.&#10;You can enter ranges like m/d-m/d."></textarea>
+    <textarea id="holidays"></textarea>
   </div>
   <div class="datelist">
     <label for="ptoDays"><b>PTO Days</b></label>
@@ -601,7 +624,7 @@ $(function() {
       <input type="radio" name="ptoDayColor" value="5" id="ptoDayColor-5" /> <label for="ptoDayColor-5" class="highlight-5"></label>
       <input type="radio" name="ptoDayColor" value="6" id="ptoDayColor-6" /> <label for="ptoDayColor-6" class="highlight-6"></label>
     </div>
-    <textarea id="ptoDays" placeholder="Enter dates in m/d format, one per line.&#10;You can enter ranges like m/d-m/d."></textarea>
+    <textarea id="ptoDays"></textarea>
   </div><br/>
   <button id="print">&#x1F5A8; Print</button>
   <div id="copyright">MiniCalendar created by Kip Robinson. Details at <a href="https://github.com/kiprobinson/minicalendar">GitHub</a>.</div>
