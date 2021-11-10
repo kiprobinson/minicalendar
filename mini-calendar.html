@@ -223,7 +223,7 @@ $(function() {
       holidayColor: saved.holidayColor || 2,
       ptoDays: saved.ptoDays || '',
       ptoDayColor: saved.ptoDayColor || 3,
-      useMMDD: ('boolean' === typeof saved.useMMDD ? saved.useMMDD : true),
+      useMMDD: ('boolean' === typeof saved.useMMDD ? saved.useMMDD : doesBrowserUseMMDD()),
     };
   }
   
@@ -570,6 +570,21 @@ $(function() {
     $('#calendar').html(html);
   };
   
+  function doesBrowserUseMMDD() {
+    //based on method here: https://stackoverflow.com/a/54115358/18511
+    try {
+      const sample = new Intl.DateTimeFormat(navigator.language, {
+        numberingSystem: 'latn',
+        calendar: 'gregory'
+      }).format(new Date(2020, 11, 31));
+      const mi = sample.indexOf(12);
+      const di = sample.indexOf(31);
+      return di >= mi;
+    }
+    catch (e) {
+      return true;
+    }
+  }
 });
 //]]> 
 </script>
