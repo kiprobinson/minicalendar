@@ -461,16 +461,26 @@ $(function() {
     return lastDayOfMonth(year, month).getDate();
   }
   
-  function numRowsForMonth(year, month) {
+  function numRowsForMonth(year, month, start, end) {
     let firstMonday = firstMondayInMonth(year, month);
     let daysInMonth = numDaysInMonth(year, month);
+    if(year !== options.year) {
+      if(month === DEC)
+        firstMonday = start;
+      else if(month === JAN)
+        daysInMonth = end.getDate();
+    }
     return Math.floor((daysInMonth - firstMonday.getDate())/7) + 1;
   }
   
   function firstDayOfCalendar() {
     if(options.includePrevDec) {
-      //If we start with previous december, start with the first Monday in December
-      return firstMondayInMonth(options.year-1, DEC);
+      //If we start with previous December, start with the first Monday on or after the 4th (so that we never have
+      //more than four weeks of prev dec on the calendar)
+      let d = firstMondayInMonth(options.year-1, DEC);
+      if(d.getDate() < 4)
+        d.setDate(d.getDate() + 7);
+      return d;
     }
     else {
       //Otherwise, we start with the Monday the week of Jan 1
@@ -567,13 +577,9 @@ $(function() {
           daysInMonth = numDaysInMonth(year, month);
           
           let monthLabel = MONTHS[month];
-          let numRows = numRowsForMonth(year, month);
-          if(year !== options.year) {
-            if((month === DEC && !options.includePrevDec) || (month === JAN && !options.includeNextJan)) {
-              monthLabel = '';
-              numRows = 1;
-            }
-          }
+          let numRows = numRowsForMonth(year, month, start, end);
+          if(numRows < 3)
+            monthLabel = '';
           
           html += `<div style="grid-row-end: span ${numRows}" class="head ${classNames.join(' ')}"><div class="month">${monthLabel}</div></div>`;
         }
