@@ -19,7 +19,7 @@ file in a browser from your local machine and run it directly.
 html{color:#000;background:#FFF}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0}table{border-collapse:collapse;border-spacing:0}fieldset,img{border:0}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal}ol,ul{list-style:none}caption,th{text-align:left}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}q:before,q:after{content:''}abbr,acronym{border:0;font-variant:normal}sup{vertical-align:text-top}sub{vertical-align:text-bottom}input,textarea,select,button{font-family:inherit;font-size:inherit;font-weight:inherit;*font-size:100%}legend{color:#000}#yui3-css-stamp.cssreset{display:none}
 /* --- end Yahoo reset script --- */
 
-*{box-sizing: border-box}
+*,*::before,*::after{box-sizing: border-box}
 
 html {
   background-color: white;
@@ -44,39 +44,79 @@ a, a:visited, a:active {
   color: blue;
 }
 #calendar {
-  display: inline-block;
-  width: 3cm;
+  display: inline-grid;
+  grid-template-columns: 0.4cm 0.52cm 0.52cm 0.52cm 0.52cm 0.52cm;
+  grid-template-rows: auto auto;
+  grid-auto-rows: 0.4cm;
   font-size: 0.25cm;
-}
-#calendar table {
-  width: 100%;
-}
-#calendar table td {
-  font-family: "Fira Sans Condensed",sans-serif;
-  font-weight: 300;
-  border: 1px solid #888;
-  text-align: right;
-  height: 0.4cm;
-  padding: 0 0.03cm;
+  border: 1px solid black;
   -webkit-print-color-adjust: exact;
   color-adjust: exact;
-  line-height: 0;
 }
-#calendar table th {
-  border: 2px solid black;
+#calendar .day {
+  font-family: "Fira Sans Condensed",sans-serif;
+  font-weight: 300;
+  text-align: right;
+  padding: 0.03cm 0.06cm;
+  position: relative;
+}
+#calendar .head {
+  border: 1px solid black;
   text-align: center;
   font-weight: 700;
 }
-#calendar table th.month-col {
-  width: 0.4cm;
-}
-#calendar table th.day-col {
-  width: 0.52cm;
-}
-#calendar table .month {
+#calendar .month {
   writing-mode: vertical-lr;
   transform: rotate(180deg);
+  height: 100%;
 }
+
+/*
+ Drawing the borders using before/after selectors instead of actual borders
+ on the cells, because if CSS sees two adjacent borders with different colors,
+ it draws a diagonal line between them. But I want the black border to always
+ draw over the gray border. So I draw the gray borders in ::before, then draw
+ the black borders over top of those in ::after.
+ Based on this approach: https://stackoverflow.com/a/11052405/18511
+*/
+#calendar .day::before {
+  display: block;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-top: 1px solid #888;
+  border-left: 1px solid #888;
+}
+#calendar .day::after {
+  display: block;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+#calendar .month-border-top::after    { border-top:    1px solid black; }
+#calendar .month-border-bottom::after { border-bottom: 1px solid black; }
+#calendar .month-border-left::after   { border-left:   1px solid black; }
+#calendar .month-border-right::after  { border-right:  1px solid black; }
+
+/*
+ These weird box-shadow/z-index rules are to fix the way the corners look
+ between months when zoomed a lot.
+*/
+#calendar .month-border-right.month-border-bottom {
+  box-shadow: 1px 1px 0 0 black;
+  z-index: 2;
+}
+#calendar .month-border-left.month-border-top {
+  box-shadow: -1px -1px 0 0 black;
+  z-index: 3;
+}
+
 #controls {
   display: inline-block;
   vertical-align: top;
@@ -87,13 +127,8 @@ a, a:visited, a:active {
 .radioOption {
   margin-left: 0.5rem;
 }
-#calendar table td.month-border-top    { border-top:    2px solid black; }
-#calendar table td.month-border-bottom { border-bottom: 2px solid black; }
-#calendar table td.month-border-left   { border-left:   2px solid black; }
-#calendar table td.month-border-right  { border-right:  2px solid black; }
-
 .datelist {
-  display:inline-block;
+  display: inline-block;
   padding-top: 0.5rem;
 }
 .datelist + .datelist {
@@ -494,9 +529,8 @@ $(function() {
   
   function generateCalendar() {
     let html = '';
-    html += `<table>`;
-    html += `<tr><th colspan="6">${options.year}</th></tr>`;
-    html += `<tr><th class="month-col"></th><th class="day-col">M</th><th class="day-col">T</th><th class="day-col">W</th><th class="day-col">T</th><th class="day-col">F</th></tr>`;
+    html += `<div style="grid-column-end: span 6" class="head">${options.year}</div>`;
+    html += `<div class="head"></div><div class="head">M</div><div class="head">T</div><div class="head">W</div><div class="head">T</div><div class="head">F</div>`;
     
     const start = firstDayOfCalendar();
     const end = lastDayOfCalendar();
@@ -521,7 +555,6 @@ $(function() {
         continue;
       
       if(dayOfWeek === MON) {
-        html += `<tr>`;
         if(month !== currMonth) {
           //we are starting a new month
           currMonth = month;
@@ -536,10 +569,11 @@ $(function() {
             }
           }
           
-          html += `<th rowspan="${numRows}" class="${classNames.join(' ')}"><div class="month">${monthLabel}</div></th>`;
+          html += `<div style="grid-row-end: span ${numRows}" class="head ${classNames.join(' ')}"><div class="month">${monthLabel}</div></div>`;
         }
       }
       
+      classNames.push('day');
       if(dayOfWeek === MON || dayOfMonth === 1)
         classNames.push('month-border-left');
       if(dayOfWeek === FRI || dayOfMonth === daysInMonth)
@@ -558,16 +592,11 @@ $(function() {
          classNames.push(`highlight-${options.ptoDayColor}`);
       }
       
-      html += `<td class="${classNames.join(' ')}">${dayOfMonth}</td>`;
-      
-      if(dayOfWeek === FRI)
-        html += `</tr>`;
+      html += `<div class="${classNames.join(' ')}">${dayOfMonth}</div>`;
     }
     
-    
-    html += `</table>`;
-    
     $('#calendar').html(html);
+    
   };
   
   function doesBrowserUseMMDD() {
