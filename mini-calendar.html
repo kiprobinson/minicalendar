@@ -79,7 +79,7 @@ a, a:visited, a:active {
  the black borders over top of those in ::after.
  Based on this approach: https://stackoverflow.com/a/11052405/18511
 */
-#calendar .day::before {
+#calendar.show-grid .day::before {
   display: block;
   content: "";
   position: absolute;
@@ -220,6 +220,7 @@ $(function() {
   $('#year').val(options.year);
   $('#includePrevDec')[0].checked = options.includePrevDec;
   $('#includeNextJan')[0].checked = options.includeNextJan;
+  $('#showGrid')[0].checked = options.showGrid;
   $('#useMMDD_true')[0].checked = options.useMMDD;
   $('#useMMDD_false')[0].checked = !options.useMMDD;
   $('#holidays').val(options.holidays);
@@ -230,7 +231,7 @@ $(function() {
   $('#holidays').on('focus', () => $('.holiday-lookup .holiday-lookup-dialog').hide());
   $('.holiday-lookup .add-holiday').on('click', addHoliday);
   
-  $('#year, #includePrevDec, #includeNextJan, input[name=useMMDD], #holidays, #ptoDays, #holidayColorGroup input, #ptoDayColorGroup input').on('change click keyup', updateOptions);
+  $('#year, #includePrevDec, #includeNextJan, #showGrid, input[name=useMMDD], #holidays, #ptoDays, #holidayColorGroup input, #ptoDayColorGroup input').on('change click keyup', updateOptions);
   
   $('#print').on('click', function() {
     window.print();
@@ -259,6 +260,7 @@ $(function() {
       ptoDays: saved.ptoDays || '',
       ptoDayColor: saved.ptoDayColor || 3,
       useMMDD: ('boolean' === typeof saved.useMMDD ? saved.useMMDD : doesBrowserUseMMDD()),
+      showGrid: ('boolean' === typeof saved.showGrid ? saved.showGrid : true),
     };
   }
   
@@ -275,6 +277,7 @@ $(function() {
     options.year = Math.floor(year);
     options.includePrevDec = !!($('#includePrevDec')[0].checked);
     options.includeNextJan = !!($('#includeNextJan')[0].checked);
+    options.showGrid = !!($('#showGrid')[0].checked);
     options.useMMDD = !!($('#useMMDD_true')[0].checked);
     options.holidays = $('#holidays').val();
     options.holidayColor = $('input[name="holidayColor"]:checked').val();
@@ -307,7 +310,8 @@ $(function() {
       ((Number(options.includeNextJan) & 1) << 1) + 
       (((Number(options.holidayColor)-1) & 7) << 2) +
       (((Number(options.ptoDayColor)-1) & 7)  << 5) +
-      ((Number(options.useMMDD) & 1) << 8)
+      ((Number(options.useMMDD) & 1) << 8) +
+      ((Number(options.showGrid) & 1) << 9)
     ).toString(36);
     
     const serializedHolidays = serializeRangeList(parseDateList(options.holidays).rangeList);
@@ -358,6 +362,7 @@ $(function() {
     const holidayColor = String(((flags >> 2) & 7) + 1);
     const ptoDayColor = String(((flags >> 5) & 7) + 1);
     const useMMDD = !!((flags >> 8) & 1);
+    const showGrid = !!((flags >> 9) & 1);
     const holidays = deserializeRangeList(matches[3], useMMDD);
     const ptoDays = deserializeRangeList(matches[4], useMMDD);
     
@@ -368,6 +373,7 @@ $(function() {
       year,
       includePrevDec,
       includeNextJan,
+      showGrid,
       useMMDD,
       holidays,
       holidayColor,
@@ -595,7 +601,7 @@ $(function() {
       html += `<div class="${classNames.join(' ')}">${dayOfMonth}</div>`;
     }
     
-    $('#calendar').html(html);
+    $('#calendar').toggleClass('show-grid', options.showGrid).html(html);
     
   };
   
@@ -619,12 +625,13 @@ $(function() {
 </script>
 </head>
 <body>
-<div id="calendar"></div>
+<div id="calendar" class="show-grid"></div>
 <div id="controls">
   <h2>Options</h2>
   <label for="year">Year:</label> <input type="number" id="year" min="1000" max="9999" /><br/>
   <label for="includePrevDec">Include previous December</label> <input type="checkbox" id="includePrevDec" /><br/>
   <label for="includeNextJan">Include next January</label> <input type="checkbox" id="includeNextJan" /><br/>
+  <label for="showGrid">Show gridlines</label> <input type="checkbox" id="showGrid" /><br/>
   Date format:
     <span class="radioOption"><label for="useMMDD_true" ><input type="radio" id="useMMDD_true"  name="useMMDD" value="true"  /> m/d</label></span>
     <span class="radioOption"><label for="useMMDD_false"><input type="radio" id="useMMDD_false" name="useMMDD" value="false" /> d/m</label></span>
