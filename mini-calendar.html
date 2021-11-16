@@ -494,8 +494,11 @@ $(function() {
   
   function lastDayOfCalendar() {
     if(options.includeNextJan) {
-      //If we end with next January, go to the last Friday in that January.
-      return lastFridayInMonth(options.year+1, JAN);
+      //If we end with next January, go to the 4th friday in January
+      let d = lastFridayInMonth(options.year+1, JAN);
+      if(d.getDate() > 28)
+        d.setDate(d.getDate() - 7);
+      return d;
     }
     else {
       //Otherwise, start with the last Friday in December.
