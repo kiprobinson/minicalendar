@@ -439,7 +439,8 @@ $(function() {
     
     const holiday = $(this).data('holiday');
     const holidayDate = holidayDateFns[holiday](options.year);
-    $('#holidays').val(($('#holidays').val().trim() + '\n' + (holidayDate.getMonth()+1) + '/' + holidayDate.getDate()).trim() + '\n');
+    const holidayStr = options.useMMDD ? `${holidayDate.getMonth()+1}/${holidayDate.getDate()}` : `${holidayDate.getDate()}/${holidayDate.getMonth()+1}`;
+    $('#holidays').val(($('#holidays').val().trim() + '\n' + holidayStr).trim() + '\n');
     updateOptions();
   }
   
