@@ -5,4 +5,6 @@ But wait, there's more! You can even mark your holidays and PTO days!
 
 [View Demo][demo]
 
+![example screencap](https://raw.githubusercontent.com/kiprobinson/minicalendar/master/demo-photo.jpg)
+
 [demo]: https://tilde.ampersand.space/mini-calendar/
