@@ -389,15 +389,6 @@ $(function() {
   function addHoliday(event) {
     event.preventDefault();
     
-    const nthDayOfMonth = (year, month, n, dayOfWeek) => {
-      const increment = (n < 0 ? -1 : 1);
-      const start = (n < 0 ? (n+1)*7 + numDaysInMonth(year, month) : (n-1)*7 + 1);
-      const d = new Date(year, month, start, 12, 0, 0);
-      while(d.getDay() !== dayOfWeek)
-        d.setDate(d.getDate() + increment);
-      return d;
-    };
-
     const easterDate = (y) => {
       const c = Math.floor(y/100);
       const n = y - 19*Math.floor(y/19);
@@ -444,19 +435,14 @@ $(function() {
     updateOptions();
   }
   
-  function firstMondayInMonth(year, month) {
-    let d = new Date(year, month, 1, 12);
-    if(d.getDay() !== MON)
-      d.setDate(d.getDate() + (MON - d.getDay() + 7)%7);
+  function nthDayOfMonth(year, month, n, dayOfWeek) {
+    const increment = (n < 0 ? -1 : 1);
+    const start = (n < 0 ? (n+1)*7 + numDaysInMonth(year, month) : (n-1)*7 + 1);
+    const d = new Date(year, month, start, 12, 0, 0);
+    while(d.getDay() !== dayOfWeek)
+      d.setDate(d.getDate() + increment);
     return d;
-  }
-  
-  function lastFridayInMonth(year, month) {
-    let d = lastDayOfMonth(year, month);
-    if(d.getDay() !== FRI)
-      d.setDate(d.getDate() - (d.getDay() - FRI + 7)%7);
-    return d;
-  }
+  };
   
   function lastDayOfMonth(year, month) {
     return new Date(year, month+1, 0, 12);
@@ -467,7 +453,7 @@ $(function() {
   }
   
   function numRowsForMonth(year, month, start, end) {
-    let firstMonday = firstMondayInMonth(year, month);
+    let firstMonday = nthDayOfMonth(year, month, 1, MON);
     let daysInMonth = numDaysInMonth(year, month);
     if(year !== options.year) {
       if(month === DEC)
@@ -480,16 +466,13 @@ $(function() {
   
   function firstDayOfCalendar() {
     if(options.includePrevDec) {
-      //If we start with previous December, start with the first Monday on or after the 4th (so that we never have
+      //If we start with previous December, start with the 4th-from-last Monday (so that we never have
       //more than four weeks of prev dec on the calendar)
-      let d = firstMondayInMonth(options.year-1, DEC);
-      if(d.getDate() < 4)
-        d.setDate(d.getDate() + 7);
-      return d;
+      return nthDayOfMonth(options.year-1, DEC, -4, MON);
     }
     else {
-      //Otherwise, we start with the Monday the week of Jan 1
-      let d = firstMondayInMonth(options.year, JAN);
+      //Otherwise, we start with the first Monday in January
+      let d = nthDayOfMonth(options.year, JAN, 1, MON);
       //if first monday is 4th or higher, we need to go back a week to ensure that we include Jan 1 on the calendar.
       if(d.getDate() > 3)
         d.setDate(d.getDate() - 7);
@@ -500,14 +483,11 @@ $(function() {
   function lastDayOfCalendar() {
     if(options.includeNextJan) {
       //If we end with next January, go to the 4th friday in January
-      let d = lastFridayInMonth(options.year+1, JAN);
-      if(d.getDate() > 28)
-        d.setDate(d.getDate() - 7);
-      return d;
+      return nthDayOfMonth(options.year+1, JAN, 4, FRI);
     }
     else {
-      //Otherwise, start with the last Friday in December.
-      let d = lastFridayInMonth(options.year, DEC);
+      //Otherwise, end with the last Friday in December.
+      let d = nthDayOfMonth(options.year, DEC, -1, FRI);
       //if last friday in month is before 29th, we need to go ahead a week to ensure all of Dec is on the calendar.
       if(d.getDate() < 29)
         d.setDate(d.getDate() + 7);
