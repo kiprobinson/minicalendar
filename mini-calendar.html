@@ -232,7 +232,11 @@ $(function() {
   $('#ptoDays').val(options.ptoDays);
   $('input[name="ptoDayColor"]').val([options.ptoDayColor]);
   $('.holiday-lookup .holiday-lookup-button').on('click', () => $('.holiday-lookup .holiday-lookup-dialog').toggle());
-  $('#holidays').on('focus', () => $('.holiday-lookup .holiday-lookup-dialog').hide());
+  $('html').on('click', (e) => {
+    const $target = $(e.target);
+    if(!$target.hasClass('add-holiday') && !$target.hasClass('holiday-lookup-button') && !$target.hasClass('holiday-lookup-dialog'))
+      $('.holiday-lookup .holiday-lookup-dialog').hide();
+  });
   $('.holiday-lookup .add-holiday').on('click', addHoliday);
   
   $('#year, #includePrevDec, #includeNextJan, #showGrid, input[name=useMMDD], #holidays, #ptoDays, #holidayColorGroup input, #ptoDayColorGroup input').on('change click keyup', updateOptions);
