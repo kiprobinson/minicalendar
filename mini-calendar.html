@@ -311,6 +311,7 @@ $(function() {
     options.weekNumbers = $('input[name="weekNumbers"]:checked').val();
     
     $('#holidays, #ptoDays').attr('placeholder', options.useMMDD ? DATELIST_PLACEHOLDER : DATELIST_PLACEHOLDER_EU);
+    $('#weekNumbersOptions').toggle(options.showWeeks);
     
     serializeOptions();
     try { localStorage.setItem('mini-calendar', JSON.stringify(options)); }
@@ -755,11 +756,13 @@ $(function() {
     <label class="radioOption" for="useMMDD_false"><input type="radio" id="useMMDD_false" name="useMMDD" value="false" /> d/m</label>
   <br/>
   <label for="showWeeks">Show week numbers</label> <input type="checkbox" id="showWeeks" /><br/>
-  Week number System:
-    <label class="radioOption" for="weekNumbers_ISO"><input type="radio" id="weekNumbers_ISO" name="weekNumbers" value="1" /> ISO</label>
-    <label class="radioOption" for="weekNumbers_NA" ><input type="radio" id="weekNumbers_NA"  name="weekNumbers" value="2" /> N. American</label>
-    <label class="radioOption" for="weekNumbers_ME" ><input type="radio" id="weekNumbers_ME"  name="weekNumbers" value="3" /> Islamic</label>
-  <br/>
+  <div id="weekNumbersOptions">
+    Week number system:
+      <label class="radioOption" for="weekNumbers_ISO"><input type="radio" id="weekNumbers_ISO" name="weekNumbers" value="1" /> ISO</label>
+      <label class="radioOption" for="weekNumbers_NA" ><input type="radio" id="weekNumbers_NA"  name="weekNumbers" value="2" /> N. American</label>
+      <label class="radioOption" for="weekNumbers_ME" ><input type="radio" id="weekNumbers_ME"  name="weekNumbers" value="3" /> Islamic</label>
+    <br/>
+  </div>
   <a href="#" id="permalink">Permalink</a><br/>
   <div class="datelist">
     <label for="holidays"><b>Holidays</b></label>
