@@ -256,6 +256,10 @@ $(function() {
   $('#controls input, #controls textarea').on('change click keyup', updateOptions);
   
   $('#print').on('click', function() {
+    
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if(isSafari)
+      alert("Looks like you're on Safari, which prints the calendar too large. If it doesn't fit on one page, try setting the scale to 90%.");
     window.print();
   });
   
