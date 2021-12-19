@@ -253,7 +253,7 @@ $(function() {
   });
   $('.holiday-lookup .add-holiday').on('click', addHoliday);
   
-  $('#controls input, #controls textarea').on('change click keyup', updateOptions);
+  $('#controls input, #controls textarea').on('input', updateOptions);
   
   $('#print').on('click', function() {
     
