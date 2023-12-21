@@ -254,7 +254,7 @@ $(function() {
     $('#dateLists').append(DATELIST_TEMPLATE.replace(/DATELIST_ID/g, i));
   }
   
-  if (^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+  if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
     // Hack for safari to get it to print the right size
     $('#calendar').addClass('safari-size-hack');
   }
@@ -296,6 +296,10 @@ $(function() {
   $('.holiday-lookup .add-holiday').on('click', addHoliday);
   
   $('#controls input, #controls textarea').on('input', updateOptions);
+  
+  $('#print').on('click', function() {
+    window.print();
+  });
   
   updateOptions();
   
