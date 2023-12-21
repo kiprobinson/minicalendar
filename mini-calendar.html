@@ -55,9 +55,18 @@ a, a:visited, a:active {
   color-adjust: exact;
   margin-right: 0.4cm;
 }
+#calendar.safari-size-hack {
+  grid-template-columns: 0.36cm 0.468cm 0.468cm 0.468cm 0.468cm 0.468cm;
+  grid-auto-rows: 0.36cm;
+  font-size: 0.225cm;
+  margin-right: 0.36cm;
+}
 #calendar.show-weeks {
   grid-template-columns: 0.4cm 0.52cm 0.52cm 0.52cm 0.52cm 0.52cm 0.4cm;
   margin-right: 0;
+}
+#calendar.show-weeks.safari-size-hack {
+  grid-template-columns: 0.36cm 0.468cm 0.468cm 0.468cm 0.468cm 0.468cm 0.36cm;
 }
 #calendar .day {
   font-family: "Fira Sans Condensed",sans-serif;
@@ -65,6 +74,9 @@ a, a:visited, a:active {
   text-align: right;
   padding: 0.03cm 0.06cm;
   position: relative;
+}
+#calendar.safari-size-hack .day {
+  padding: 0.027cm 0.054cm;
 }
 #calendar .head {
   border: 1px solid black;
@@ -242,6 +254,11 @@ $(function() {
     $('#dateLists').append(DATELIST_TEMPLATE.replace(/DATELIST_ID/g, i));
   }
   
+  if (^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+    // Hack for safari to get it to print the right size
+    $('#calendar').addClass('safari-size-hack');
+  }
+  
   const options = loadOptions();
   $('#year').val(options.year);
   $('#includePrevDec')[0].checked = options.includePrevDec;
@@ -279,14 +296,6 @@ $(function() {
   $('.holiday-lookup .add-holiday').on('click', addHoliday);
   
   $('#controls input, #controls textarea').on('input', updateOptions);
-  
-  $('#print').on('click', function() {
-    
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if(isSafari)
-      alert("Looks like you're on Safari, which prints the calendar too large. If it doesn't fit on one page, try setting the scale to 90%.");
-    window.print();
-  });
   
   updateOptions();
   
