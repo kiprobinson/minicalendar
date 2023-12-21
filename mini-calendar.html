@@ -315,8 +315,11 @@ $(function() {
     if(!saved)
       saved = {};
     
+    // if month is december and we have no saved calendar, default to next year
+    const defaultYear = new Date().getFullYear() + (new Date().getMonth() === DEC ? 1 : 0);
+    
     const ret = {
-      year: (1000 <= saved.year && saved.year <= 9999 ? Number(saved.year) : new Date().getFullYear()),
+      year: (1000 <= saved.year && saved.year <= 9999 ? Number(saved.year) : defaultYear),
       includePrevDec: ('boolean' === typeof saved.includePrevDec ? saved.includePrevDec : true),
       includeNextJan: ('boolean' === typeof saved.includeNextJan ? saved.includeNextJan : true),
       dateLists: [],
