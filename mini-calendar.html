@@ -128,6 +128,9 @@ a, a:visited, a:active {
 #calendar .month-border-left::after   { border-left:   1px solid black; }
 #calendar .month-border-right::after  { border-right:  1px solid black; }
 
+#calendar:not(.show-grid) .head.mon, #calendar:not(.show-grid) .head.tue, #calendar:not(.show-grid) .head.wed, #calendar:not(.show-grid) .head.thu   { border-right: none; }
+#calendar:not(.show-grid) .head.tue, #calendar:not(.show-grid) .head.wed, #calendar:not(.show-grid) .head.thu, #calendar:not(.show-grid) .head.fri   { border-left:  none; }
+
 /*
  These weird box-shadow/z-index rules are to fix the way the corners look
  between months when zoomed a lot.
@@ -766,7 +769,7 @@ $(function() {
   function generateCalendar() {
     let html = '';
     html += `<div class="head year">${options.year}</div>`;
-    html += `<div class="head"></div><div class="head">M</div><div class="head">T</div><div class="head">W</div><div class="head">T</div><div class="head">F</div>`;
+    html += `<div class="head"></div><div class="head mon">M</div><div class="head tue">T</div><div class="head wed">W</div><div class="head thu">T</div><div class="head fri">F</div>`;
     
     if(options.showWeeks)
       html += '<div class="head">Wk</div>';
