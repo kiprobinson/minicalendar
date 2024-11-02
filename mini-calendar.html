@@ -68,6 +68,12 @@ a, a:visited, a:active {
 #calendar.show-weeks.safari-size-hack {
   grid-template-columns: 0.36cm 0.468cm 0.468cm 0.468cm 0.468cm 0.468cm 0.36cm;
 }
+#calendar.show-weeks.show-weeks-on-left {
+  grid-template-columns: 0.4cm 0.4cm 0.52cm 0.52cm 0.52cm 0.52cm 0.52cm;
+}
+#calendar.show-weeks.show-weeks-on-left.safari-size-hack {
+  grid-template-columns: 0.36cm 0.36cm 0.468cm 0.468cm 0.468cm 0.468cm 0.468cm;
+}
 #calendar .day {
   font-family: "Fira Sans Condensed",sans-serif;
   font-weight: 300;
@@ -150,6 +156,10 @@ a, a:visited, a:active {
   margin-left: 1.0em;
   border: 1px solid black;
   padding: 0.5em;
+}
+#controls #weekNumberOptions {
+  padding-left: 1rem;
+  padding-bottom: 0.25rem;
 }
 input.invalid {
   background-color: #fbb;
@@ -249,7 +259,8 @@ $(function() {
   const DOY_REV_EU = DOY_EU.reduce((acc,val,i) => ({...acc, [val]:i}), {});
   const DATELIST_PLACEHOLDER = 'Enter dates in m/d format, one per line.\nYou can enter ranges like m/d-m/d.';
   const DATELIST_PLACEHOLDER_EU = 'Enter dates in d/m format, one per line.\nYou can enter ranges like d/m-d/m.';
-  const WEEK_NUMBER_OPTION = {ISO: "1", NA: "2", ME: "3"};
+  const WEEK_NUMBER_SYSTEM = {ISO: "1", NA: "2", ME: "3"};
+  const WEEK_NUMBER_LOCATION = {LEFT: "1", RIGHT: "2"};
   const DEFAULT_COLORS = [2, 3, 4, 5, 6, 1];
   
   const DATELIST_TEMPLATE = $('#dateListTemplate').text();
@@ -270,7 +281,8 @@ $(function() {
   $('#showWeeks')[0].checked = options.showWeeks;
   $('#useMMDD_true')[0].checked = options.useMMDD;
   $('#useMMDD_false')[0].checked = !options.useMMDD;
-  $('input[name="weekNumbers"]').val([options.weekNumbers]);
+  $('input[name="weekNumberLocation"]').val([options.weekNumberLocation]);
+  $('input[name="weekNumberSystem"]').val([options.weekNumberSystem]);
   
   for(let i = 0; i < NUM_LISTS; i++) {
     $(`#dateList-${i}`).val(options.dateLists[i].dates);
@@ -329,7 +341,8 @@ $(function() {
       useMMDD: ('boolean' === typeof saved.useMMDD ? saved.useMMDD : doesBrowserUseMMDD()),
       showGrid: ('boolean' === typeof saved.showGrid ? saved.showGrid : true),
       showWeeks: ('boolean' === typeof saved.showWeeks ? saved.showWeeks : false),
-      weekNumbers: saved.weekNumbers || WEEK_NUMBER_OPTION.ISO,
+      weekNumberLocation: saved.weekNumberLocation || WEEK_NUMBER_LOCATION.RIGHT,
+      weekNumberSystem: saved.weekNumberSystem || WEEK_NUMBER_SYSTEM.ISO,
     };
     
     const lookForLegacyDates = !saved.dateLists;
@@ -376,7 +389,8 @@ $(function() {
     options.showGrid = !!($('#showGrid')[0].checked);
     options.showWeeks = !!($('#showWeeks')[0].checked);
     options.useMMDD = !!($('#useMMDD_true')[0].checked);
-    options.weekNumbers = $('input[name="weekNumbers"]:checked').val();
+    options.weekNumberLocation = $('input[name="weekNumberLocation"]:checked').val();
+    options.weekNumberSystem = $('input[name="weekNumberSystem"]:checked').val();
     
     for(let i = 0; i < NUM_LISTS; i++) {
       options.dateLists[i].dates = $(`#dateList-${i}`).val();
@@ -384,7 +398,7 @@ $(function() {
       $(`#dateList-${i}`).attr('placeholder', options.useMMDD ? DATELIST_PLACEHOLDER : DATELIST_PLACEHOLDER_EU);
     }
     
-    $('#weekNumbersOptions').toggle(options.showWeeks);
+    $('#weekNumberOptions').toggle(options.showWeeks);
     
     serializeOptions();
     try { localStorage.setItem('mini-calendar', JSON.stringify(options)); }
@@ -411,7 +425,8 @@ $(function() {
       ((Number(options.useMMDD) & 1) << 2) +
       ((Number(options.showGrid) & 1) << 3) +
       ((Number(options.showWeeks) & 1) << 4) +
-      (((Number(options.weekNumbers)-1) & 7) << 5)
+      (((Number(options.weekNumberSystem)-1) & 7) << 5) +
+      (((Number(options.weekNumberLocation)-1) & 1) << 8)
     ).toString(36);
     
     const serializedRangeLists = [];
@@ -466,7 +481,7 @@ $(function() {
       const useMMDD = !!((flags >> 8) & 1);
       const showGrid = !!((flags >> 9) & 1);
       const showWeeks = !!((flags >> 10) & 1);
-      const weekNumbers = String(((flags >> 11) & 7) + 1);
+      const weekNumberSystem = String(((flags >> 11) & 7) + 1);
       const holidays = deserializeRangeList(matches[3], useMMDD);
       const ptoDays = deserializeRangeList(matches[4], useMMDD);
       
@@ -479,7 +494,7 @@ $(function() {
         includeNextJan,
         showGrid,
         showWeeks,
-        weekNumbers,
+        weekNumberSystem,
         useMMDD,
         dateLists: [
           { dates: holidays, color: holidayColor },
@@ -501,7 +516,8 @@ $(function() {
       const useMMDD = !!((flags >> 2) & 1);
       const showGrid = !!((flags >> 3) & 1);
       const showWeeks = !!((flags >> 4) & 1);
-      const weekNumbers = String(((flags >> 5) & 7) + 1);
+      const weekNumberSystem = String(((flags >> 5) & 7) + 1);
+      const weekNumberLocation = String(((flags >> 8) & 1) + 1);
       const dateLists = [];
       
       const encodedDateLists = matches[3].split(/-/).filter(s => s !== '');
@@ -519,7 +535,8 @@ $(function() {
         includeNextJan,
         showGrid,
         showWeeks,
-        weekNumbers,
+        weekNumberLocation,
+        weekNumberSystem,
         useMMDD,
         dateLists,
       };
@@ -708,8 +725,8 @@ $(function() {
     date = new Date(date);
     
     let weekOneStart = new Date(date.getFullYear(), JAN, 1, 12);
-    switch(options.weekNumbers) {
-      case WEEK_NUMBER_OPTION.NA:
+    switch(options.weekNumberSystem) {
+      case WEEK_NUMBER_SYSTEM.NA:
         //North American week numbers: the week starts on Sunday, and week 1 is the week that
         //contains January 1.
         
@@ -724,7 +741,7 @@ $(function() {
           weekOneStart = nthDayOfWeek(weekOneStart, 0, SUN);
         break;
       
-      case WEEK_NUMBER_OPTION.ME:
+      case WEEK_NUMBER_SYSTEM.ME:
         //Islamic week numbers: the week starts on Saturday, and week 1 is the week that
         //contains January 1.
         
@@ -743,7 +760,7 @@ $(function() {
         //ISO-8601 week numbers: the week starts on Monday, and week 1 is the week that contains
         //the first Thursday in January
         
-        //if we are in the four days of the year, or the first three days of the year, then the
+        //if we are in the last four days of the year, or the first three days of the year, then the
         //ISO year may be different from the calendar year. In that week, the ISO year is determined
         //by the calendar year of the Thursday of that week.
         if((date.getMonth() === DEC && date.getDate() >= 28) || (date.getMonth() === JAN && date.getDate() <= 3)) {
@@ -769,9 +786,14 @@ $(function() {
   function generateCalendar() {
     let html = '';
     html += `<div class="head year">${options.year}</div>`;
-    html += `<div class="head"></div><div class="head mon">M</div><div class="head tue">T</div><div class="head wed">W</div><div class="head thu">T</div><div class="head fri">F</div>`;
+    html += '<div class="head"></div>';
     
-    if(options.showWeeks)
+    if(options.showWeeks && options.weekNumberLocation === WEEK_NUMBER_LOCATION.LEFT)
+      html += '<div class="head">Wk</div>';
+    
+    html += `<div class="head mon">M</div><div class="head tue">T</div><div class="head wed">W</div><div class="head thu">T</div><div class="head fri">F</div>`;
+    
+    if(options.showWeeks && options.weekNumberLocation === WEEK_NUMBER_LOCATION.RIGHT)
       html += '<div class="head">Wk</div>';
     
     const start = firstDayOfCalendar();
@@ -831,9 +853,16 @@ $(function() {
         }
       }
       
+      if(options.showWeeks && options.weekNumberLocation === WEEK_NUMBER_LOCATION.LEFT && dayOfWeek === MON) {
+        const weekNumber = getWeekNumber(d);
+        const weekClassNames = new Set([...classNames].filter(c => !/highlight/.test(c)));
+        weekClassNames.add('month-border-right');
+        html += `<div class="${[...weekClassNames].join(' ')}">${weekNumber}</div>`;
+      }
+      
       html += `<div class="${[...classNames].join(' ')}">${dayOfMonth}</div>`;
       
-      if(options.showWeeks && dayOfWeek === FRI) {
+      if(options.showWeeks && options.weekNumberLocation === WEEK_NUMBER_LOCATION.RIGHT && dayOfWeek === FRI) {
         const weekNumber = getWeekNumber(d);
         const weekClassNames = new Set([...classNames].filter(c => !/highlight/.test(c)));
         weekClassNames.add('month-border-left');
@@ -844,6 +873,7 @@ $(function() {
     
     $('#calendar').toggleClass('show-grid', options.showGrid).html(html);
     $('#calendar').toggleClass('show-weeks', options.showWeeks).html(html);
+    $('#calendar').toggleClass('show-weeks-on-left', options.showWeeks && options.weekNumberLocation === WEEK_NUMBER_LOCATION.LEFT).html(html);
   };
   
   function doesBrowserUseMMDD() {
@@ -923,12 +953,20 @@ $(function() {
     <label class="radioOption" for="useMMDD_false"><input type="radio" id="useMMDD_false" name="useMMDD" value="false" /> d/m</label>
   <br/>
   <label for="showWeeks">Show week numbers</label> <input type="checkbox" id="showWeeks" /><br/>
-  <div id="weekNumbersOptions">
-    Week number system:
-      <label class="radioOption" for="weekNumbers_ISO"><input type="radio" id="weekNumbers_ISO" name="weekNumbers" value="1" /> ISO</label>
-      <label class="radioOption" for="weekNumbers_NA" ><input type="radio" id="weekNumbers_NA"  name="weekNumbers" value="2" /> N. American</label>
-      <label class="radioOption" for="weekNumbers_ME" ><input type="radio" id="weekNumbers_ME"  name="weekNumbers" value="3" /> Islamic</label>
-    <br/>
+  <div id="weekNumberOptions">
+    <div id="weekNumberLocation">
+      Week number location:
+        <label class="radioOption" for="weekNumberLocation_LEFT" ><input type="radio" id="weekNumberLocation_LEFT"  name="weekNumberLocation" value="1" /> Left</label>
+        <label class="radioOption" for="weekNumberLocation_RIGHT"><input type="radio" id="weekNumberLocation_RIGHT" name="weekNumberLocation" value="2" /> Right</label>
+      <br/>
+    </div>
+    <div id="weekNumberSystem">
+      Week number system:
+        <label class="radioOption" for="weekNumberSystem_ISO"><input type="radio" id="weekNumberSystem_ISO" name="weekNumberSystem" value="1" /> ISO</label>
+        <label class="radioOption" for="weekNumberSystem_NA" ><input type="radio" id="weekNumberSystem_NA"  name="weekNumberSystem" value="2" /> N. American</label>
+        <label class="radioOption" for="weekNumberSystem_ME" ><input type="radio" id="weekNumberSystem_ME"  name="weekNumberSystem" value="3" /> Islamic</label>
+      <br/>
+    </div>
   </div>
   <a href="#" id="permalink">Permalink</a><br/>
   <div id="dateLists"></div>
