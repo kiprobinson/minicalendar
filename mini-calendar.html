@@ -68,6 +68,12 @@ a, a:visited, a:active {
 #calendar.show-weeks.safari-size-hack {
   grid-template-columns: 0.36cm 0.468cm 0.468cm 0.468cm 0.468cm 0.468cm 0.36cm;
 }
+#calendar.show-weeks.show-weeks-on-left {
+  grid-template-columns: 0.4cm 0.4cm 0.52cm 0.52cm 0.52cm 0.52cm 0.52cm;
+}
+#calendar.show-weeks.show-weeks-on-left.safari-size-hack {
+  grid-template-columns: 0.36cm 0.36cm 0.468cm 0.468cm 0.468cm 0.468cm 0.468cm;
+}
 #calendar .day {
   font-family: "Fira Sans Condensed",sans-serif;
   font-weight: 300;
@@ -864,6 +870,7 @@ $(function() {
     
     $('#calendar').toggleClass('show-grid', options.showGrid).html(html);
     $('#calendar').toggleClass('show-weeks', options.showWeeks).html(html);
+    $('#calendar').toggleClass('show-weeks-on-left', options.showWeeks && options.weekNumberLocation === WEEK_NUMBER_LOCATION.LEFT).html(html);
   };
   
   function doesBrowserUseMMDD() {
