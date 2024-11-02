@@ -760,7 +760,7 @@ $(function() {
         //ISO-8601 week numbers: the week starts on Monday, and week 1 is the week that contains
         //the first Thursday in January
         
-        //if we are in the four days of the year, or the first three days of the year, then the
+        //if we are in the last four days of the year, or the first three days of the year, then the
         //ISO year may be different from the calendar year. In that week, the ISO year is determined
         //by the calendar year of the Thursday of that week.
         if((date.getMonth() === DEC && date.getDate() >= 28) || (date.getMonth() === JAN && date.getDate() <= 3)) {
