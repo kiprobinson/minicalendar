@@ -157,7 +157,7 @@ a, a:visited, a:active {
   border: 1px solid black;
   padding: 0.5em;
 }
-#controls #weekNumberLocation, #controls #weekNumbersOptions {
+#controls #weekNumberLocation, #controls #weekNumberSystem {
   padding-left: 1rem;
 }
 input.invalid {
@@ -258,7 +258,7 @@ $(function() {
   const DOY_REV_EU = DOY_EU.reduce((acc,val,i) => ({...acc, [val]:i}), {});
   const DATELIST_PLACEHOLDER = 'Enter dates in m/d format, one per line.\nYou can enter ranges like m/d-m/d.';
   const DATELIST_PLACEHOLDER_EU = 'Enter dates in d/m format, one per line.\nYou can enter ranges like d/m-d/m.';
-  const WEEK_NUMBER_OPTION = {ISO: "1", NA: "2", ME: "3"};
+  const WEEK_NUMBER_SYSTEM = {ISO: "1", NA: "2", ME: "3"};
   const WEEK_NUMBER_LOCATION = {LEFT: "1", RIGHT: "2"};
   const DEFAULT_COLORS = [2, 3, 4, 5, 6, 1];
   
@@ -281,7 +281,7 @@ $(function() {
   $('#useMMDD_true')[0].checked = options.useMMDD;
   $('#useMMDD_false')[0].checked = !options.useMMDD;
   $('input[name="weekNumberLocation"]').val([options.weekNumberLocation]);
-  $('input[name="weekNumbers"]').val([options.weekNumbers]);
+  $('input[name="weekNumberSystem"]').val([options.weekNumberSystem]);
   
   for(let i = 0; i < NUM_LISTS; i++) {
     $(`#dateList-${i}`).val(options.dateLists[i].dates);
@@ -341,7 +341,7 @@ $(function() {
       showGrid: ('boolean' === typeof saved.showGrid ? saved.showGrid : true),
       showWeeks: ('boolean' === typeof saved.showWeeks ? saved.showWeeks : false),
       weekNumberLocation: saved.weekNumberLocation || WEEK_NUMBER_LOCATION.RIGHT,
-      weekNumbers: saved.weekNumbers || WEEK_NUMBER_OPTION.ISO,
+      weekNumberSystem: saved.weekNumberSystem || WEEK_NUMBER_SYSTEM.ISO,
     };
     
     const lookForLegacyDates = !saved.dateLists;
@@ -389,7 +389,7 @@ $(function() {
     options.showWeeks = !!($('#showWeeks')[0].checked);
     options.useMMDD = !!($('#useMMDD_true')[0].checked);
     options.weekNumberLocation = $('input[name="weekNumberLocation"]:checked').val();
-    options.weekNumbers = $('input[name="weekNumbers"]:checked').val();
+    options.weekNumberSystem = $('input[name="weekNumberSystem"]:checked').val();
     
     for(let i = 0; i < NUM_LISTS; i++) {
       options.dateLists[i].dates = $(`#dateList-${i}`).val();
@@ -398,7 +398,7 @@ $(function() {
     }
     
     $('#weekNumberLocation').toggle(options.showWeeks);
-    $('#weekNumbersOptions').toggle(options.showWeeks);
+    $('#weekNumberSystem').toggle(options.showWeeks);
     
     serializeOptions();
     try { localStorage.setItem('mini-calendar', JSON.stringify(options)); }
@@ -425,7 +425,7 @@ $(function() {
       ((Number(options.useMMDD) & 1) << 2) +
       ((Number(options.showGrid) & 1) << 3) +
       ((Number(options.showWeeks) & 1) << 4) +
-      (((Number(options.weekNumbers)-1) & 7) << 5) +
+      (((Number(options.weekNumberSystem)-1) & 7) << 5) +
       (((Number(options.weekNumberLocation)-1) & 1) << 8)
     ).toString(36);
     
@@ -481,7 +481,7 @@ $(function() {
       const useMMDD = !!((flags >> 8) & 1);
       const showGrid = !!((flags >> 9) & 1);
       const showWeeks = !!((flags >> 10) & 1);
-      const weekNumbers = String(((flags >> 11) & 7) + 1);
+      const weekNumberSystem = String(((flags >> 11) & 7) + 1);
       const holidays = deserializeRangeList(matches[3], useMMDD);
       const ptoDays = deserializeRangeList(matches[4], useMMDD);
       
@@ -494,7 +494,7 @@ $(function() {
         includeNextJan,
         showGrid,
         showWeeks,
-        weekNumbers,
+        weekNumberSystem,
         useMMDD,
         dateLists: [
           { dates: holidays, color: holidayColor },
@@ -516,7 +516,7 @@ $(function() {
       const useMMDD = !!((flags >> 2) & 1);
       const showGrid = !!((flags >> 3) & 1);
       const showWeeks = !!((flags >> 4) & 1);
-      const weekNumbers = String(((flags >> 5) & 7) + 1);
+      const weekNumberSystem = String(((flags >> 5) & 7) + 1);
       const weekNumberLocation = String(((flags >> 8) & 1) + 1);
       const dateLists = [];
       
@@ -536,7 +536,7 @@ $(function() {
         showGrid,
         showWeeks,
         weekNumberLocation,
-        weekNumbers,
+        weekNumberSystem,
         useMMDD,
         dateLists,
       };
@@ -725,8 +725,8 @@ $(function() {
     date = new Date(date);
     
     let weekOneStart = new Date(date.getFullYear(), JAN, 1, 12);
-    switch(options.weekNumbers) {
-      case WEEK_NUMBER_OPTION.NA:
+    switch(options.weekNumberSystem) {
+      case WEEK_NUMBER_SYSTEM.NA:
         //North American week numbers: the week starts on Sunday, and week 1 is the week that
         //contains January 1.
         
@@ -741,7 +741,7 @@ $(function() {
           weekOneStart = nthDayOfWeek(weekOneStart, 0, SUN);
         break;
       
-      case WEEK_NUMBER_OPTION.ME:
+      case WEEK_NUMBER_SYSTEM.ME:
         //Islamic week numbers: the week starts on Saturday, and week 1 is the week that
         //contains January 1.
         
@@ -959,11 +959,11 @@ $(function() {
       <label class="radioOption" for="weekNumberLocation_RIGHT"><input type="radio" id="weekNumberLocation_RIGHT" name="weekNumberLocation" value="2" /> Right</label>
     <br/>
   </div>
-  <div id="weekNumbersOptions">
+  <div id="weekNumberSystem">
     Week number system:
-      <label class="radioOption" for="weekNumbers_ISO"><input type="radio" id="weekNumbers_ISO" name="weekNumbers" value="1" /> ISO</label>
-      <label class="radioOption" for="weekNumbers_NA" ><input type="radio" id="weekNumbers_NA"  name="weekNumbers" value="2" /> N. American</label>
-      <label class="radioOption" for="weekNumbers_ME" ><input type="radio" id="weekNumbers_ME"  name="weekNumbers" value="3" /> Islamic</label>
+      <label class="radioOption" for="weekNumberSystem_ISO"><input type="radio" id="weekNumberSystem_ISO" name="weekNumberSystem" value="1" /> ISO</label>
+      <label class="radioOption" for="weekNumberSystem_NA" ><input type="radio" id="weekNumberSystem_NA"  name="weekNumberSystem" value="2" /> N. American</label>
+      <label class="radioOption" for="weekNumberSystem_ME" ><input type="radio" id="weekNumberSystem_ME"  name="weekNumberSystem" value="3" /> Islamic</label>
     <br/>
   </div>
   <a href="#" id="permalink">Permalink</a><br/>
