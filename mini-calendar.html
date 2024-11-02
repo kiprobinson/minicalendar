@@ -157,8 +157,9 @@ a, a:visited, a:active {
   border: 1px solid black;
   padding: 0.5em;
 }
-#controls #weekNumberLocation, #controls #weekNumberSystem {
+#controls #weekNumberOptions {
   padding-left: 1rem;
+  padding-bottom: 0.25rem;
 }
 input.invalid {
   background-color: #fbb;
@@ -397,8 +398,7 @@ $(function() {
       $(`#dateList-${i}`).attr('placeholder', options.useMMDD ? DATELIST_PLACEHOLDER : DATELIST_PLACEHOLDER_EU);
     }
     
-    $('#weekNumberLocation').toggle(options.showWeeks);
-    $('#weekNumberSystem').toggle(options.showWeeks);
+    $('#weekNumberOptions').toggle(options.showWeeks);
     
     serializeOptions();
     try { localStorage.setItem('mini-calendar', JSON.stringify(options)); }
@@ -953,18 +953,20 @@ $(function() {
     <label class="radioOption" for="useMMDD_false"><input type="radio" id="useMMDD_false" name="useMMDD" value="false" /> d/m</label>
   <br/>
   <label for="showWeeks">Show week numbers</label> <input type="checkbox" id="showWeeks" /><br/>
-  <div id="weekNumberLocation">
-    Week number location:
-      <label class="radioOption" for="weekNumberLocation_LEFT" ><input type="radio" id="weekNumberLocation_LEFT"  name="weekNumberLocation" value="1" /> Left</label>
-      <label class="radioOption" for="weekNumberLocation_RIGHT"><input type="radio" id="weekNumberLocation_RIGHT" name="weekNumberLocation" value="2" /> Right</label>
-    <br/>
-  </div>
-  <div id="weekNumberSystem">
-    Week number system:
-      <label class="radioOption" for="weekNumberSystem_ISO"><input type="radio" id="weekNumberSystem_ISO" name="weekNumberSystem" value="1" /> ISO</label>
-      <label class="radioOption" for="weekNumberSystem_NA" ><input type="radio" id="weekNumberSystem_NA"  name="weekNumberSystem" value="2" /> N. American</label>
-      <label class="radioOption" for="weekNumberSystem_ME" ><input type="radio" id="weekNumberSystem_ME"  name="weekNumberSystem" value="3" /> Islamic</label>
-    <br/>
+  <div id="weekNumberOptions">
+    <div id="weekNumberLocation">
+      Week number location:
+        <label class="radioOption" for="weekNumberLocation_LEFT" ><input type="radio" id="weekNumberLocation_LEFT"  name="weekNumberLocation" value="1" /> Left</label>
+        <label class="radioOption" for="weekNumberLocation_RIGHT"><input type="radio" id="weekNumberLocation_RIGHT" name="weekNumberLocation" value="2" /> Right</label>
+      <br/>
+    </div>
+    <div id="weekNumberSystem">
+      Week number system:
+        <label class="radioOption" for="weekNumberSystem_ISO"><input type="radio" id="weekNumberSystem_ISO" name="weekNumberSystem" value="1" /> ISO</label>
+        <label class="radioOption" for="weekNumberSystem_NA" ><input type="radio" id="weekNumberSystem_NA"  name="weekNumberSystem" value="2" /> N. American</label>
+        <label class="radioOption" for="weekNumberSystem_ME" ><input type="radio" id="weekNumberSystem_ME"  name="weekNumberSystem" value="3" /> Islamic</label>
+      <br/>
+    </div>
   </div>
   <a href="#" id="permalink">Permalink</a><br/>
   <div id="dateLists"></div>
