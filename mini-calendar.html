@@ -44,6 +44,11 @@ h2 {
 a, a:visited, a:active {
   color: blue;
 }
+.tooltip {
+  cursor: help;
+  vertical-align: super;
+  font-size: 0.8em;
+}
 #calendar {
   display: inline-grid;
   grid-template-columns: 0.4cm 0.52cm 0.52cm 0.52cm 0.52cm 0.52cm;
@@ -960,7 +965,7 @@ $(function() {
       <br/>
     </div>
     <div id="weekNumberSystem">
-      Week number system:
+      Week number system<span class="tooltip" title="ISO: Week 1 starts on the Monday before the first Thursday of the year&#10;&#10;North American: Week 1 starts on the Sunday before the first Saturday of the year&#10;&#10;Islamic: Week 1 starts on the Saturday before the first Friday of the year">&#9432;</span>:
         <label class="radioOption" for="weekNumberSystem_ISO"><input type="radio" id="weekNumberSystem_ISO" name="weekNumberSystem" value="1" /> ISO</label>
         <label class="radioOption" for="weekNumberSystem_NA" ><input type="radio" id="weekNumberSystem_NA"  name="weekNumberSystem" value="2" /> N. American</label>
         <label class="radioOption" for="weekNumberSystem_ME" ><input type="radio" id="weekNumberSystem_ME"  name="weekNumberSystem" value="3" /> Islamic</label>
