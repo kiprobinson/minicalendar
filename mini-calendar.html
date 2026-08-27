@@ -33,7 +33,7 @@ body {
   padding-right: 5px;
 }
 textarea {
-  min-width: 250px;
+  min-width: 150px;
   min-height: 400px;
   padding: 3px;
 }
@@ -162,6 +162,9 @@ a, a:visited, a:active {
   border: 1px solid black;
   padding: 0.5em;
 }
+#controls #printWrap {
+  float: right;
+}
 #controls #weekNumberOptions {
   padding-left: 1rem;
   padding-bottom: 0.25rem;
@@ -172,12 +175,19 @@ input.invalid {
 .radioOption {
   margin-left: 0.5rem;
 }
+#controls #dateLists {
+  margin-top: 1rem;
+  border-top: 1px solid #ccc;
+  padding-top: 0.5rem;
+}
 .dateList {
   display: inline-block;
   padding-top: 0.5rem;
 }
 .dateList + .dateList {
   padding-left: 0.5rem;
+  border-left: 1px solid #ccc;
+  margin-left: 0.25rem;
 }
 .color-group input[type=radio] {
   display: none;
@@ -216,12 +226,12 @@ input.invalid {
   display: block;
 }
 .holiday-lookup .holiday-lookup-button {
-  cursor: pointer;
   display: inline-block;
 }
 .holiday-lookup .holiday-lookup-dialog {
   display: none;
   position: absolute;
+  z-index: 100;
   background-color: #eee;
   border: 1px solid black;
   padding: 5px;
@@ -901,7 +911,6 @@ $(function() {
 
 <script id="dateListTemplate" type="text/html">
   <div class="dateList" data-id="DATELIST_ID">
-    <!-- <label for="holidays"><b>Holidays</b></label> -->
     <div id="dateListColorGroup-DATELIST_ID" class="color-group">
       <input type="radio" name="dateListColor-DATELIST_ID" value="1" id="dateListColor-1-DATELIST_ID" />
       <label for="dateListColor-1-DATELIST_ID" class="highlight-1"></label>
@@ -917,7 +926,7 @@ $(function() {
       <label for="dateListColor-6-DATELIST_ID" class="highlight-6"></label>
     </div>
     <div class="holiday-lookup">
-      <div class="holiday-lookup-button">Lookup Holiday</div>
+      <a href="#" class="holiday-lookup-button">&#x1F50D; Lookup Holiday</a>
       <div class="holiday-lookup-dialog">
         <a class="add-holiday" data-holiday="newYearsDay" href="#">New Year's Day</a>
         <a class="add-holiday" data-holiday="martinLutherKingJrDay" href="#">Martin Luther King Jr. Day</a>
@@ -947,6 +956,7 @@ $(function() {
 <body>
 <div id="calendar"></div>
 <div id="controls">
+  <div id="printWrap"><button id="print">&#x1F5A8; Print</button></div>
   <h2>Options</h2>
   <label for="year">Year:</label> <input type="number" id="year" min="1000" max="9999" /><br/>
   <label for="includePrevDec">Include previous December</label> <input type="checkbox" id="includePrevDec" /><br/>
@@ -974,7 +984,6 @@ $(function() {
   </div>
   <a href="#" id="permalink">Permalink</a><br/>
   <div id="dateLists"></div>
-  <button id="print">&#x1F5A8; Print</button>
   <div id="copyright">MiniCalendar created by Kip Robinson. Details at <a href="https://github.com/kiprobinson/minicalendar">GitHub</a>.</div>
 </div>
 </body>
